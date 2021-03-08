@@ -1,13 +1,13 @@
 # Mini-task 2
-By looping every token in .cpp file, selected token will push into or drop from stack.
+By looping every token in .cpp file, the selected token will push into or drop from stack.
 ```py
 s = Stack()
 for line in srcFile:
     for token in line:
 ```
 
-### Class stack
-Function `isExist` is added into class stack to determine selected token exist or not.
+## Class stack
+Function `isExist` is added into class stack to determine selected token exist or not. As `/` may need to determine with `*`, the function will check for `/` or any others in stack separately. Then it will return a boolean `True` or `False`.
 ```py
 def isExist( self , item ):
         if item == "/": return item in self._theItems
@@ -22,10 +22,10 @@ if token in "/\"\'{[(" and not s.isExist(token):
 ```
 
 ## / handling
-If token equals to `/` and `/` is already added in the stack, check for boolean `isSlashAfterStar` to decide skip to the next row or not.
+If token equals to `/` and it is already added in the stack, check for boolean `isSlashAfterStar` to decide skip to the next row or not.
 
 ### isSlashAfterStar == false
-Since `//` will comment the whole line, after drop the token from the stack, it will break the inner for loop to read starting from next line. 
+Since `//` will comment the whole line, after dropping the token from the stack, it will break the inner for loop to read starting from the next line. 
 ```py
 elif token == "/" and s.isExist(token) and not isSlashAfterStar:
     s.pop()
@@ -40,13 +40,13 @@ elif token == "/" and s.isExist(token) and isSlashAfterStar:
 ```
 
 ## * handling
-In order to not include single * as mulitple, `*` will add into stack only when `*` is not in stack but `/` exist.
+In order to not include single * as multiple, `*` will add into stack only when `*` is not in stack but `/` exist.
 ```py
 elif token == "*" and not s.isExist(token) and s.isExist("/"):
     s.push(token)
 ```
 
-When token is `*` and `*` is already added in the stack, it will remove `*` in the stack and change boolean `isSlashAfterStar` to `true` in order to prepare face next token `/`.
+When token is `*` and it is already added in the stack, it will remove `*` in the stack and change boolean `isSlashAfterStar` to `true` in order to prepare to handle next token `/`.
 ```py
 elif token == "*" and s.isExist(token):
     s.pop()
@@ -96,7 +96,7 @@ int main()
 ```
 
 ## Invalid C++ file
-Since the stack is not empty in the end, it is an invalid C++ file from this example.
+The stack is not empty in the end as an extra `}` add, it is an invalid C++ file from this example.
 ```py
 This is an invalid C++ file, cause delimiters are not balanced.
 ```
@@ -108,13 +108,13 @@ Example:
 using namespace std;
 
 int main()
-[
+[ // Extra [ add here
 {
     // test 1 single (
     /* test 2 {
     [ test 3 }
     */ cout) << "Hello World:)" << "\n";
-    cout << '[' << endl; }
+    cout << '[' << endl; } // Extra } add here
     int i = 3 * 4;
 }
 ```

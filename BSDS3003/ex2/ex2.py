@@ -63,4 +63,3 @@ if __name__ == "__main__":
             print("This is a valid C++ file.")
         else:
             print("This is an invalid C++ file, cause delimiters are not balanced.")
-
