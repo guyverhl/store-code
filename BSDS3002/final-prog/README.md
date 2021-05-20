@@ -10,7 +10,7 @@ pip install -r requirements.txt
 ```py
 code .env
 ```
-Then copy token in `tweepy_token.txt` to new `.env`.
+Then copy token in `tweepy_token.txt.zip` to new `.env`.
 
 ### Run getTwitterAPI.ipynb
 </details>
