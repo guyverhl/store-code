@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Tutorial 2: R Basic Plots, ggplot2, and Data Manipulation</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Mr. Zebin Yang" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="libs/remark-css/duke-blue.css" rel="stylesheet" />
+    <link href="libs/remark-css/hygge-duke.css" rel="stylesheet" />
+    <link rel="stylesheet" href="libs\cc-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="libs\figure-captions.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Tutorial 2: R Basic Plots, ggplot2, and Data Manipulation
+### Mr. Zebin Yang
+
+---
+
+
+
+# Outline
+
+- Exploratory Data Analysis
+  
+- Basic Plots
+  
+- Quick Plot with qplot()
+  
+- Advanced Plots with ggplot()
+
+- Data Manipulation
+---
+
+# Exploratory Data Analysis
+
+This data frame contains the following columns: 
+
+  - Sex: Factor with levels "F" and "M".
+  - Bwt: body weight in kg.
+  - Hwt: heart weight in g.
+
+It is always a good idea to take a look at the data # (if it is not too large).
+You can always summarize a dataset to find the basic statistics
+
+
+```r
+library(MASS)
+attach(cats)
+summary(cats)
+```
+
+```
+##  Sex         Bwt             Hwt       
+##  F:47   Min.   :2.000   Min.   : 6.30  
+##  M:97   1st Qu.:2.300   1st Qu.: 8.95  
+##         Median :2.700   Median :10.10  
+##         Mean   :2.724   Mean   :10.63  
+##         3rd Qu.:3.025   3rd Qu.:12.12  
+##         Max.   :3.900   Max.   :20.50
+```
+
+---
+# Exploratory Data Analysis
+- Check Data
+
+.pull-left[
+
+
+```r
+dim(cats)
+```
+
+```
+## [1] 144   3
+```
+
+```r
+names(cats)
+```
+
+```
+## [1] "Sex" "Bwt" "Hwt"
+```
+
+```r
+class(Hwt)
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+class(Sex)
+```
+
+```
+## [1] "factor"
+```
+]
+
+.pull-right[
+
+
+```r
+head(cats)
+```
+
+```
+##   Sex Bwt Hwt
+## 1   F 2.0 7.0
+## 2   F 2.0 7.4
+## 3   F 2.0 9.5
+## 4   F 2.1 7.2
+## 5   F 2.1 7.3
+## 6   F 2.1 7.6
+```
+
+```r
+tail(cats)
+```
+
+```
+##     Sex Bwt  Hwt
+## 139   M 3.6 15.0
+## 140   M 3.7 11.0
+## 141   M 3.8 14.8
+## 142   M 3.8 16.8
+## 143   M 3.9 14.4
+## 144   M 3.9 20.5
+```
+]
+
+---
+#  Exploratory Data Analysis
+
+- Basic Summary
+
+Some useful functions are listed:
+
+.pull-left[
+
+```r
+mean(Bwt)
+```
+
+```
+## [1] 2.723611
+```
+
+```r
+var(Bwt)
+```
+
+```
+## [1] 0.2355225
+```
+
+```r
+sd(Bwt)
+```
+
+```
+## [1] 0.4853066
+```
+
+```r
+sqrt(var(Bwt))
+```
+
+```
+## [1] 0.4853066
+```
+]
+
+.pull-right[
+
+```r
+sub1 = subset(cats,Sex=='F')
+head(sub1, 3)
+```
+
+```
+##   Sex Bwt Hwt
+## 1   F   2 7.0
+## 2   F   2 7.4
+## 3   F   2 9.5
+```
+
+```r
+sub2 = subset(cats, 
+       (Bwt&lt;=2.5 &amp; Hwt&gt;=10))
+head(sub2, 3)
+```
+
+```
+##    Sex Bwt  Hwt
+## 17   F 2.2 10.9
+## 18   F 2.2 11.0
+## 27   F 2.3 10.1
+```
+]
+
+---
+# Basic Plots 
+- Line Plot
+
+```r
+# Calculate range of x and y 
+g_range &lt;- range(0, Hwt, Bwt)
+plot(Hwt, type = "o", ylim=g_range, col="blue")
+lines(Bwt, type = "o", col="red")
+legend(1, g_range[2], c("Hwt","Bwt"), col=c("blue","red"), lty=1)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+#  Basic Plots
+- Bar Plot
+
+```r
+Male = apply(cats[Sex=='M', c("Bwt","Hwt")], 2, mean)
+Female = apply(cats[Sex=='F', c("Bwt","Hwt")], 2, mean)
+data = as.matrix(rbind(Male,Female))
+barplot(data,beside=TRUE,col=c("blue","red"))
+legend("left", c("Male", "Female"), fill=c("blue","red"))
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+#  Basic Plots
+- Boxplot
+
+```r
+boxplot(cats[,c("Bwt","Hwt")], col=c("blue","red"))
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+#  Basic Plots
+- Histogram
+
+```r
+hist(Bwt)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+#  Basic Plots
+- Pie Plot
+
+```r
+MaleNum = nrow(cats[Sex=='M', ])
+FemaleNum = nrow(cats[Sex=='F', ])
+pie(c(MaleNum,FemaleNum), col=rainbow(2),
+   labels=c("Male","Female"))
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+#  Basic Plots
+- Scatter plot
+
+```r
+plot(Bwt, Hwt)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Basic Plots (More Options)
+- Title (main)
+- Label (xlab, ylab)
+- Color (col)
+- Legend (legend)
+- Font Size (cex)
+- Line type (lty)
+- Line Width (lwd)
+- Symbol (pch)
+- So on
+
+---
+# Basic Plots (More Options)
+- Here we re-do the scatter plot.
+
+```r
+plot(Bwt, Hwt, xlab = "Body Weight in kg", ylab="Heart Weight in g",
+     main="scatterplot", type='n')
+points(Bwt[Sex=='F'], Hwt[Sex=='F'], col="red", pch=1, cex=1)
+points(Bwt[Sex=='M'], Hwt[Sex=='M'], col="blue", pch=2, cex=1)
+legend("topleft",cex=1, legend= c("Female","Male"),
+       col=c("red", "blue"), pch=c(1,2))
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Basic Plots (More Options)
+.pull-left[
+- Symbols
+&lt;figure&gt;
+  &lt;img src="Symbols.png"&gt;
+&lt;/figure&gt;
+]
+
+.pull-right[
+- Line Types
+
+&lt;figure&gt;
+  &lt;img src="LineType.png"&gt;
+&lt;/figure&gt;
+]
+
+- For more details, please refer to https://www.statmethods.net/advgraphs/axes.html or R documents
+
+---
+# Basic Plots (Visualize Linear Regression)
+-  Build linear regression model on heart weight and body weight
+
+```r
+mod=lm(Hwt~Bwt,data=cats)
+summary(mod) 
+```
+
+```
+## 
+## Call:
+## lm(formula = Hwt ~ Bwt, data = cats)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.5694 -0.9634 -0.0921  1.0426  5.1238 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -0.3567     0.6923  -0.515    0.607    
+## Bwt           4.0341     0.2503  16.119   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.452 on 142 degrees of freedom
+## Multiple R-squared:  0.6466,	Adjusted R-squared:  0.6441 
+## F-statistic: 259.8 on 1 and 142 DF,  p-value: &lt; 2.2e-16
+```
+
+---
+# Basic Plots (Visualize Linear Regression)
+- Plot the fitted line to the points
+
+```r
+plot(Bwt, Hwt, xlab = "Body Weight in kg", ylab="Heart Weight in g",
+       main="scatterplot", type='n')
+points(Bwt[Sex=='F'], Hwt[Sex=='F'], col="green", pch=3, cex=1)
+points(Bwt[Sex=='M'], Hwt[Sex=='M'], col="purple", pch=4, cex=1)
+legend("left",cex=1, legend= c("Female","Male"),
+       col=c("green", "purple"), pch=c(3,4))
+abline(mod, col='red',lwd=3) # equivalent to abline(coef = coef(mod))
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Quick Plot with qplot()
+
+- qplot() is a quick plot API of R:ggplot2, supplies many defaults.
+- It is analog to base plot(), where “q” means quick.
+
+
+```r
+qplot(x, y, data=, color=, shape=, size=, alpha=, geom=, method=, 
+      formula=, facets=, xlim=, ylim= xlab=, ylab=, main=, sub=)
+```
+
+- geom  
+Specifies the geometric objects that define the graph type. The geom option is expressed as a character vector with one or more entries. geom values include "point", "smooth", "boxplot", "line", "histogram", "density", "bar", and "jitter".
+
+- facets	
+Creates a trellis graph by specifying conditioning variables. Its value is expressed as rowvar ~ colvar. To create trellis graphs based on a single conditioning variable, use rowvar~. or .~colvar.
+
+- method and formula  
+For example, to add simple linear regression lines, you'd specify geom="smooth", method="lm", formula=y~x.
+
+---
+# Quick Plot with qplot()
+- Geom
+
+.pull-left[
+
+```r
+library(ggplot2)
+qplot(Species, Sepal.Width, 
+      geom="boxplot", 
+      data = iris, 
+      main="Boxplot")
+```
+
+![](T2_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+
+```r
+library(ggplot2)
+qplot(Species, Sepal.Width, 
+      geom="violin", 
+      data = iris, 
+      main="Violin Plot")
+```
+
+![](T2_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+]
+
+---
+# Quick Plot with qplot()
+- Facets, colors and sizes
+
+```r
+qplot(Sepal.Length, Petal.Length, geom="jitter", data = iris, 
+      facets =.~Species, colour = Species, size = Species)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Quick Plot with qplot()
+- Smoothing
+
+```r
+qplot(Sepal.Length, Petal.Length, data = iris, 
+      geom=c("point","smooth"), method="lm")
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- install.packages("ggplot2")
+- library(ggplot2)
+
+```r
+library(ggplot2)
+```
+
+- ggplot() provides more flexible APIs
+- Layered grammar   
+Provide options like position, statistics, coordinate systems, faceting, themes and so on
+
+```r
+ggplot(data = &lt;DATA&gt;) + 
+  &lt;GEOM_FUNCTION&gt;(
+     mapping = aes(&lt;MAPPINGS&gt;),
+     stat = &lt;STAT&gt;, 
+     position = &lt;POSITION&gt;
+  ) +
+  &lt;THEMEs&gt; + 
+  &lt;COORDINATE_FUNCTION&gt; +
+  ...
+```
+- For your self learning  
+http://rfun.library.duke.edu/ggplot/#themes
+
+---
+# Advanced Plots with ggplot()
+- Case study with Boston Housing
+
+```r
+library(MASS)
+head(Boston)
+```
+
+```
+##      crim zn indus chas   nox    rm  age    dis rad tax ptratio  black
+## 1 0.00632 18  2.31    0 0.538 6.575 65.2 4.0900   1 296    15.3 396.90
+## 2 0.02731  0  7.07    0 0.469 6.421 78.9 4.9671   2 242    17.8 396.90
+## 3 0.02729  0  7.07    0 0.469 7.185 61.1 4.9671   2 242    17.8 392.83
+## 4 0.03237  0  2.18    0 0.458 6.998 45.8 6.0622   3 222    18.7 394.63
+## 5 0.06905  0  2.18    0 0.458 7.147 54.2 6.0622   3 222    18.7 396.90
+## 6 0.02985  0  2.18    0 0.458 6.430 58.7 6.0622   3 222    18.7 394.12
+##   lstat medv
+## 1  4.98 24.0
+## 2  9.14 21.6
+## 3  4.03 34.7
+## 4  2.94 33.4
+## 5  5.33 36.2
+## 6  5.21 28.7
+```
+
+---
+# Advanced Plots with ggplot()
+- Basic Box plot
+
+```r
+# Create a 2D ggplot graph, with Charles River (chas) 
+# as the x_axis and median value of house as the y_axis;
+p &lt;-ggplot(data=Boston,aes(x=factor(chas),y=medv)) 
+# Add the boxplot, title, xlab, ylab and summary on the graph
+p+geom_boxplot(outlier.colour="red",outlier.shape=8,outlier.size=4)+
+ggtitle("House price VS Charles River dummy variable")+
+xlab("Charles River dummy variable")+ylab("House price") +
+stat_summary(fun.y=mean, geom="point", shape=23, size=3)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Boxplot with multiple groups
+
+```r
+# Use an additional keyword "fill" to achieve multiple groups; 
+# In addition, you may use keyword "color" to include more groups.
+p &lt;-ggplot(data=Boston,aes(x=factor(chas),y=medv, fill=factor(rad))) 
+# Add the boxplot, title, xlab, ylab and summary on the graph
+p+ geom_boxplot(outlier.colour="red",outlier.shape=8,outlier.size=4)+
+ggtitle("House price VS Charles River dummy variable &amp; rad")+
+labs(x = "Charles River dummy variable",y = "House price")
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Dodge bar plot
+
+```r
+p &lt;-ggplot(data=Boston,aes(x=factor(rad), fill=factor(chas)))
+p + stat_summary(aes(y = medv), fun = mean, 
+                 geom = "bar", position = position_dodge()) +
+    labs(x = "Accessibility to radial highways",
+         y = "Averge medv")+
+    coord_flip()
+```
+
+```
+## No summary function supplied, defaulting to `mean_se()
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Histogram with kernel density
+
+```r
+ggplot(Boston, aes(x=medv))+
+geom_histogram(aes(y = ..density..), colour= "black", 
+               fill="white",binwidth=2)+
+geom_density(alpha=.2, fill = "red")+
+ggtitle("Histogram of House Price") +
+xlab("House Price") + ylab("Density") + 
+geom_vline(aes(xintercept=mean(medv)),
+color="blue", linetype="dashed", size=1)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Histogram with an overlay normal density
+
+```r
+ggplot(Boston, aes(x = medv)) +
+geom_histogram(aes(y = ..density..), color = "royalblue",
+               fill = "white", alpha=0.5, binwidth=1.5) +
+stat_function(fun = dnorm, colour= "red",
+          args= list(mean = mean(Boston$medv, na.rm = TRUE),
+          sd= sd(Boston$medv, na.rm = TRUE))) +
+ggtitle("Normal Curve for overall House Price")
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Scatter plot with regression line
+
+```r
+ggplot(Boston, aes(x=rm, y=medv)) +
+geom_point()+
+geom_smooth(method=lm,linetype="dashed",
+            color="darkred", fill="gold", formula = y ~ x)+
+geom_text(x=5, y=40, label="STAT3622 Tutorial",
+family = "Times New Roman", color = "red", size=8)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Scatter plot with loess smooth curve
+
+```r
+ggplot(Boston, aes(x=rm, y=medv)) +
+geom_point()+
+geom_smooth(method = 'loess', formula = y ~ x)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- To divide the points and lines by the factor chas
+
+```r
+ggplot(Boston, aes(x=rm, y=medv, 
+               color=factor(chas))) +
+geom_point() +  facet_wrap(~chas) + 
+geom_smooth(method=lm, aes(fill=factor(chas)), formula = y ~ x)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot()
+- Add lines on the scatterplot
+
+```r
+library(gridExtra)
+sp&lt;-ggplot(data=Boston, aes(x=rm, y=medv)) + geom_point(size=2)
+sp1&lt;-sp+geom_hline(yintercept=20,linetype="dashed",color="red")
+sp2&lt;-sp+geom_vline(xintercept=3,linetype="dotted",color="blue")
+sp3&lt;-sp+geom_abline(intercept=37,slope =-5,color="red",linetype="solid")
+sp4&lt;-sp+geom_segment(aes(x=5,y=35,xend=6,yend= 30),
+                     arrow=arrow(length = unit(0.5, "cm")))
+grid.arrange(sp1,sp2,sp3,sp4, ncol=2)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Advanced Plots with ggplot() (Theme)
+- Using the theme() function, you can customize your visualization extensively
+- It controls all non-data display
+- Image Credit: Themes from R for Data Science by Grolemund &amp; Wickham
+&lt;figure&gt;
+  &lt;img src="visualization-themes.png"&gt;
+&lt;/figure&gt;
+
+---
+# Advanced Plots with ggplot() (Theme)
+.pull-left[
+
+```r
+library(ggthemes)
+ggplot(Boston, aes(x=rm, y=medv)) +
+geom_point()+
+theme_economist() + 
+scale_colour_economist()
+```
+
+![](T2_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
+]
+.pull-right[
+
+```r
+library(ggthemes)
+ggplot(Boston, aes(x=rm, y=medv)) +
+geom_point()+
+theme_solarized(light = F) +
+scale_colour_solarized("red")
+```
+
+![](T2_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+]
+
+---
+# Advanced Plots with ggplot() (Save a graph)
+
+```r
+pdf("rplot.pdf") 
+ggplot(Boston, aes(x=rm, y=medv, color=factor(chas), 
+                   shape=factor(chas))) +
+geom_point() +
+geom_smooth(method=lm, aes(fill=factor(chas)))
+dev.off()
+```
+
+```r
+jpeg("rplot.jpg", width = 350, height = 350) 
+ggplot(Boston, aes(x=rm, y=medv, color=factor(chas), 
+                   shape=factor(chas))) +
+geom_point() +
+geom_smooth(method=lm, aes(fill=factor(chas)))
+dev.off()
+```
+
+---
+# Data Manipulation (dplyr)
+## Install the library "dplyr"
+- install.packages("dplyr")
+- library(dplyr)
+- help(package="dplyr")
+
+```r
+library(dplyr)
+```
+
+---
+# Data Manipulation (dplyr)
+## Diamond Dataset Introduction
+- price: price in US dollars ($326–$18,823)
+- carat: weight of the diamond (0.2–5.01)
+- cut: quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+- color: diamond colour, from J (worst) to D (best)
+- claritya: measurement of how clear the diamond is 
+- x: length in mm (0–10.74)
+- y: width in mm (0–58.9)
+- z: depth in mm (0–31.8)
+- depth: total depth percentage = 2 * z / (x + y) (43–79)
+- table: width of top of diamond relative to widest point (43–95)
+ 
+
+```r
+head(diamonds, 3)
+```
+
+```
+## # A tibble: 3 x 10
+##   carat cut     color clarity depth table price     x     y     z
+##   &lt;dbl&gt; &lt;ord&gt;   &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  0.23 Ideal   E     SI2      61.5    55   326  3.95  3.98  2.43
+## 2  0.21 Premium E     SI1      59.8    61   326  3.89  3.84  2.31
+## 3  0.23 Good    E     VS1      56.9    65   327  4.05  4.07  2.31
+```
+
+---
+# Data Manipulation (dplyr)
+## filter() 
+
+- `\(filter\)` allows you to select a subset of rows.
+    - Mathematical relationship: ==, &lt;, &lt;=, &gt;, &gt;=.
+    - Logical Operators: &amp;, |, !.
+    - %in%, is.na(), between().
+
+
+```r
+filter(diamonds, cut == "Premium")[1:6,]
+```
+
+```
+## # A tibble: 6 x 10
+##   carat cut     color clarity depth table price     x     y     z
+##   &lt;dbl&gt; &lt;ord&gt;   &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 0.21  Premium E     SI1      59.8    61   326  3.89  3.84  2.31
+## 2 0.290 Premium I     VS2      62.4    58   334  4.2   4.23  2.63
+## 3 0.22  Premium F     SI1      60.4    61   342  3.88  3.84  2.33
+## 4 0.2   Premium E     SI2      60.2    62   345  3.79  3.75  2.27
+## 5 0.32  Premium E     I1       60.9    58   345  4.38  4.42  2.68
+## 6 0.24  Premium I     VS1      62.5    57   355  3.97  3.94  2.47
+```
+
+---
+# Data Manipulation (dplyr)
+## filter() 
+
+- `\(filter\)` allows you to select a subset of rows.
+    - Mathematical relationship: ==, &lt;, &lt;=, &gt;, &gt;=.
+    - Logical Operators: &amp;, |, !.
+    - %in%, is.na(), between().
+
+
+```r
+filter_diamonds = filter(diamonds, x&gt;=5 &amp; 
+                         cut %in% c("Premium","Ideal"))
+head(filter_diamonds)
+```
+
+```
+## # A tibble: 6 x 10
+##   carat cut     color clarity depth table price     x     y     z
+##   &lt;dbl&gt; &lt;ord&gt;   &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  0.7  Ideal   E     SI1      62.5    57  2757  5.7   5.72  3.57
+## 2  0.7  Ideal   G     VS2      61.6    56  2757  5.7   5.67  3.5 
+## 3  0.8  Premium H     SI1      61.5    58  2760  5.97  5.93  3.66
+## 4  0.75 Premium E     SI1      59.9    54  2760  6     5.96  3.58
+## 5  0.74 Ideal   G     SI1      61.6    55  2760  5.8   5.85  3.59
+## 6  0.75 Premium G     VS2      61.7    58  2760  5.85  5.79  3.59
+```
+
+---
+# Data Manipulation (dplyr)
+## filter()
+
+
+```r
+ggplot(filter_diamonds, aes(x,price)) + 
+  geom_bin2d() + 
+  scale_y_continuous(trans = "log10") + 
+  geom_smooth(method = "lm")
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-40-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Data Manipulation (dplyr)
+## arrange()
+- `\(arrange()\)` works similarly to `\(filter()\)` except that instead of filtering or selecting rows, it reorders them.
+
+
+```r
+head(arrange(diamonds, cut, depth)) # by default ascending
+```
+
+```
+## # A tibble: 6 x 10
+##   carat cut   color clarity depth table price     x     y     z
+##   &lt;dbl&gt; &lt;ord&gt; &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  1    Fair  G     SI1      43      59  3634  6.32  6.27  3.97
+## 2  1    Fair  G     VS2      44      53  4032  6.31  6.24  4.12
+## 3  1.43 Fair  I     VS1      50.8    60  6727  7.73  7.25  3.93
+## 4  0.3  Fair  E     VVS2     51      67   945  4.67  4.62  2.37
+## 5  0.7  Fair  D     SI1      52.2    65  1895  6.04  5.99  3.14
+## 6  0.37 Fair  F     IF       52.3    61  1166  4.96  4.91  2.58
+```
+
+---
+# Data Manipulation (dplyr)
+## arrange()
+
+
+```r
+head(arrange(diamonds, desc(price)))
+```
+
+```
+## # A tibble: 6 x 10
+##   carat cut       color clarity depth table price     x     y     z
+##   &lt;dbl&gt; &lt;ord&gt;     &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  2.29 Premium   I     VS2      60.8    60 18823  8.5   8.47  5.16
+## 2  2    Very Good G     SI1      63.5    56 18818  7.9   7.97  5.04
+## 3  1.51 Ideal     G     IF       61.7    55 18806  7.37  7.41  4.56
+## 4  2.07 Ideal     G     SI2      62.5    55 18804  8.2   8.13  5.11
+## 5  2    Very Good H     SI1      62.8    57 18803  7.95  8     5.01
+## 6  2.29 Premium   I     SI1      61.8    59 18797  8.52  8.45  5.24
+```
+
+---
+# Data Manipulation (dplyr)
+## mutate()  
+- It is often useful to add new columns that are functions of existing columns. This is the job of mutate():
+
+
+```r
+new_diamonds = mutate(diamonds, price_to_weight  = price/carat)  
+head(new_diamonds[,"price_to_weight"])
+```
+
+```
+## # A tibble: 6 x 1
+##   price_to_weight
+##             &lt;dbl&gt;
+## 1           1417.
+## 2           1552.
+## 3           1422.
+## 4           1152.
+## 5           1081.
+## 6           1400
+```
+
+---
+# Data Manipulation (dplyr)
+## mutate()  
+
+
+```r
+ggplot(new_diamonds, aes(x = clarity, y = price_to_weight)) +
+  geom_boxplot()
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-44-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Data Manipulation (dplyr)
+## group_by()  
+- The group_by() function splits a dataset into several groups, and then we can calculate for example, the mean, max, min of each group.
+
+```r
+# Grouped by chas, and then get the sample size of each group
+summarise(group_by(new_diamonds, factor(clarity)), n()) 
+```
+
+```
+## # A tibble: 8 x 2
+##   `factor(clarity)` `n()`
+##   &lt;ord&gt;             &lt;int&gt;
+## 1 I1                  741
+## 2 SI2                9194
+## 3 SI1               13065
+## 4 VS2               12258
+## 5 VS1                8171
+## 6 VVS2               5066
+## 7 VVS1               3655
+## 8 IF                 1790
+```
+
+---
+# Data Manipulation (dplyr)
+## group_by()  
+
+```r
+# Grouped by chas, and then get the mean of each group
+sumary_diamond1 = summarise(group_by(new_diamonds, factor(cut)), 
+                            mean(price_to_weight))
+colnames(sumary_diamond1) = c("cut","avg_price")
+ggplot(sumary_diamond1, aes(x=cut, y=avg_price)) +
+geom_bar(stat="identity")
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-46-1.png" style="display: block; margin: auto;" /&gt;
+
+
+---
+# Data Manipulation (Pipeline %&gt;%)
+Powerful trick for coding a sequence of operations.
+- Example 1 
+
+```r
+diamonds %&gt;%
+  filter(x&gt;0, y&gt;0, y&lt;20) %&gt;%
+  mutate(sym=x-y) %&gt;%
+  filter(abs(sym)&lt;0.2) %&gt;%
+  group_by(carat) %&gt;%
+  summarize(avgprice=mean(price)) %&gt;%
+  ggplot(aes(carat, avgprice)) + geom_line() + 
+  geom_smooth(method = 'loess', formula = 'y ~ x')
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-47-1.png" style="display: block; margin: auto;" /&gt;
+
+
+---
+# Data Manipulation (Pipeline %&gt;%)
+- Example 2
+
+```r
+diamonds %&gt;%
+  filter(x&gt;0, y&gt;0, y&lt;20) %&gt;%
+  mutate(sym=x-y) %&gt;%
+  filter(abs(sym)&lt;0.2) %&gt;%
+  group_by(clarity) %&gt;%
+  summarize(avgprice=mean(price)) %&gt;%
+  ggplot(aes(clarity, avgprice))+
+  geom_line(aes(group=1)) + geom_point(size=2)
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-48-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Data Manipulation (Pipeline %&gt;%)
+- Example 3
+
+```r
+diamonds %&gt;%
+  filter(x&gt;0, y&gt;0, y&lt;20) %&gt;%
+  mutate(sym=x-y) %&gt;%
+  filter(abs(sym)&lt;0.2) %&gt;%
+  group_by(cut, depth) %&gt;%
+  summarize(n=n()) %&gt;%
+  filter(depth&gt;50, depth&lt;75) %&gt;%
+  mutate(prop=n/sum(n)) %&gt;%
+  ggplot(aes(depth, prop, color=cut)) + geom_line()
+```
+
+&lt;img src="T2_files/figure-html/unnamed-chunk-49-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+class: center, middle 
+# Q&amp;A
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

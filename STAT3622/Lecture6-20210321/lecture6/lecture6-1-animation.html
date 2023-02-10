@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT3622 Data Visualization (with Python)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content=" Wenbin Du  The University of Hong Kong" />
+    <meta name="date" content="2021-03-01" />
+    <script src="libs/header-attrs-2.6/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="stat3622-style.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT3622 Data Visualization (with Python)
+## Lecture 6
+### <br>Wenbin Du<br> The University of Hong Kong
+### 1 March 2021
+
+---
+
+# Contour plots in matplotlib
+A quite common type of chart in the scientific world is the contour plot or contour map. This visualization is in fact suitable for displaying three-dimensional surfaces through a contour map composed of curves closed showing the points on the surface that are
+located at the same level, or that have the same z value.
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+#contour and contourf draw contour lines and filled contours, respectively.
+fig = plt.figure()
+ax = fig.add_subplot()
+X = np.arange(1,4,1) #array([1, 2, 3])
+Y = np.arange(1,3,1) #array([1, 2])
+X,Y = np.meshgrid(X,Y)#Return coordinate matrices from coordinate vectors
+#X=array([[1, 2, 3],[1, 2, 3]])
+#Y=array([[1, 1, 1], [2, 2, 2]])
+```
+---
+# Contour plots in matplotlib
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+#contour and contourf draw contour lines and filled contours, respectively.
+fig = plt.figure()
+ax = fig.add_subplot()
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+```
+---
+# Contour plots in matplotlib
+`\(Z=(1-y^5+x^5)\times \exp (-x^2-y^2)\)`
+```python
+fig = plt.figure()
+ax = fig.add_subplot()
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z= f(X,Y)
+ax.contour(X,Y,Z)
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig02.png" width="35%"/&gt;
+&lt;/center&gt;
+---
+# Contour plots in matplotlib
+`\(Z=(1-y^5+x^5)\times \exp (-x^2-y^2)\)`
+```python
+fig = plt.figure()
+ax = fig.add_subplot()
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z= f(X,Y)
+C = ax.contour(X,Y,Z,levels =10,colors='black')
+# levels determines the number and positions of the contour lines / regions
+ax.clabel(C,inline=True)
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig03.png" width="30%"/&gt;
+&lt;/center&gt;
+---
+# Contour plots in matplotlib
+`\(Z=(1-y^5+x^5)\times \exp (-x^2-y^2)\)`
+```python
+fig = plt.figure()
+ax = fig.add_subplot()
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z= f(X,Y)
+ax.contourf(X,Y,Z)
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig01.png" width="35%"/&gt;
+&lt;/center&gt;
+---
+# Contour plots in matplotlib
+`\(Z=(1-y^5+x^5)\times \exp (-x^2-y^2)\)`
+```python
+fig = plt.figure()
+ax = fig.add_subplot()
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z = f(X,Y)
+C = ax.contour(X,Y,Z,levels =10,colors='black')
+# levels determines the number and positions of the contour lines / regions
+ax.clabel(C,inline=True)
+ax.contourf(X,Y,Z,levels =10)
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig04.png" width="25%"/&gt;
+&lt;/center&gt;
+---
+# Animations with Matplotlib
+```python
+% matplotlib notebook 
+# use this line to show animations properly
+# This is a magic function in IPython
+# %matplotlib inline sets the backend of matplotlib to the 'inline' backend:
+#With this backend, the output of plotting commands is displayed inline within frontends like the Jupyter notebook
+#https://stackoverflow.com/questions/43027980/purpose-of-matplotlib-inline
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+fig, ax = plt.subplots()
+x = np.arange(0, 2*np.pi, 0.01)
+line, = ax.plot(x, np.sin(x))
+def animate(i):
+    line.set_ydata(np.sin(x + i / 100))  # update the data.
+    return line,
+ani = animation.FuncAnimation(fig, animate, interval=2,save_count=150)
+```
+---
+# Animations with Matplotlib
+&lt;center class="half"&gt;
+    &lt;img src="movie.gif" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Animations with Matplotlib
+```python
+%matplotlib notebook 
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+def f(x,y,alpha):
+    return (1-y**alpha+x**alpha)*np.exp(-x**2-y**2)
+fig, ax = plt.subplots()
+X = np.arange(1,3,0.1)
+Y = np.arange(1,3,0.1)
+X,Y = np.meshgrid(X,Y)
+def animate(i):
+    ax.clear()
+    C = ax.contour(X,Y,f(X,Y,1+0.1*i),levels =12,colors='black')
+    # levels determines the number and positions of the contour lines / regions
+    ax.clabel(C,inline=True)
+    ax.contourf(X,Y,f(X,Y,1+0.1*i),levels =12)
+    ax.set_title(i)
+interval=2
+ani = animation.FuncAnimation(
+    fig, animate,20, interval=interval,save_count=50)
+*ani.save("ani_contour.gif")
+```
+---
+# Animations with Matplotlib
+
+&lt;center class="half"&gt;
+    &lt;img src="ani_contour.gif" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Visualization for 3D data
+- The mplot3d toolkit is included with all standard installations of matplotlib and allows you to extend the capabilities of visualization to 3D data. 
+
+- With this package you are still using the Figure object, only that instead of the Axes
+object you will define a new kind of object, called Axes3D
+
+```python
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+# ax = fig.add_subplot()
+ax = Axes3D(fig)
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z = f(X,Y)
+*C = ax.plot_surface(X,Y,Z,cmap=plt.cm.hot)
+```
+---
+# Visualization for 3D data
+- The mplot3d toolkit is included with all standard installations of matplotlib and allows you to extend the capabilities of visualization to 3D data. 
+
+- With this package you are still using the Figure object, only that instead of the Axes
+object you will define a new kind of object, called Axes3D
+
+&lt;center class="half"&gt;
+    &lt;img src="l6_m3d.png" width="35%"/&gt;
+&lt;/center&gt;
+---
+# Visualization for 3D data
+- You can rotate the surface using the view_init() function. In fact, this function adjusts the view point from which you see the surface, changing the two kwargs called elev and azim. Through their combination you can get the surface displayed from any angle. The first kwarg adjusts the height at which the surface is seen, while azim adjusts the angle of rotation of the surface.
+```python
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+# ax = fig.add_subplot()
+ax = Axes3D(fig)
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z = f(X,Y)
+*C = ax.plot_surface(X,Y,Z,rstride=1,cstride=1,cmap=plt.get_cmap('rainbow'))
+*ax.view_init(elev=30,azim=125)
+#A 3D surface stands out most by changing the color map, for example by setting the
+#cmap kwarg. 
+```
+---
+# Visualization for 3D data
+- You can rotate the surface using the view_init() function. In fact, this function adjusts the view point from which you see the surface, changing the two kwargs called elev and azim. Through their combination you can get the surface displayed from any angle. The first kwarg adjusts the height at which the surface is seen, while azim adjusts the angle of rotation of the surface.
+&lt;center class="half"&gt;
+    &lt;img src="l6_m3d.png" width="35%"/&gt;&lt;img src="l6_m3d1.png" width="35%"/&gt;
+&lt;/center&gt;
+---
+# Animations with Matplotlib
+```python 
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+fig = plt.figure()
+# ax = fig.add_subplot()
+ax = Axes3D(fig)
+X = np.arange(-2,2,0.1)
+Y = np.arange(-2,2,0.1)
+X,Y = np.meshgrid(X,Y)
+def f(x,y):
+    return (1-y**5+x**5)*np.exp(-x**2-y**2)
+Z = f(X,Y)
+def animate(i):
+    ax.clear()
+    C = ax.plot_surface(X,Y,Z,cmap = plt.get_cmap('rainbow'))#cmap=plt.cm.hot)
+    ax.view_init(elev=30,azim=70+2*i)
+interval=2
+ani = animation.FuncAnimation(
+    fig, animate,60, interval=interval*1e+2,save_count=150)
+ani.save('ani_surface.gif')
+```
+---
+# Animations with Matplotlib
+&lt;center class="half"&gt;
+    &lt;img src="ani_surface.gif" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Animations with Matplotlib
+```python 
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+fig = plt.figure()
+# creating a subplot
+ax1 = fig.add_subplot()
+def animate(i):
+    data = open('stock.txt', 'r').read()
+    lines = data.split('\n')
+    xs = []
+    ys = []
+    for line in lines:
+        x, y = line.split(',')  # Delimiter is comma
+        xs.append(float(x))
+        ys.append(float(y))
+    ax1.clear()
+    ax1.plot(xs, ys)
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.title('Live graph with matplotlib')
+ani = animation.FuncAnimation(fig, animate, interval=1000)
+```
+Source:
+Parul Pandey
+https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
+---
+# Animations with Matplotlib
+&lt;center class="half"&gt;
+    &lt;img src="l6_ani_live.gif" width="55%"/&gt;
+&lt;/center&gt;
+
+Source:
+Parul Pandey
+https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
+---
+class: center, middle
+# Thank you! 
+Q&amp;A or Email wbdu@hku.hk
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

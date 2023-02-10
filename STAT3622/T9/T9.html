@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Tutorial 7: Meta Analysis through R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Miss. Na Zhao" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="libs/remark-css/duke-blue.css" rel="stylesheet" />
+    <link href="libs/remark-css/hygge-duke.css" rel="stylesheet" />
+    <link rel="stylesheet" href="libs/cc-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="libs/figure-captions.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Tutorial 7: Meta Analysis through R
+### Miss. Na Zhao
+
+---
+
+
+
+# Outline
+
+- Meta Analysis
+ + quantitative, binary case
+ + fix, random effect
+ + forest, funnel plot
+- Network Meta Analysis
+ + fix, random effect
+ + more detail of output
+ + network, forest plot
+
+---
+# Meta Analysis
+- A meta-analysis combines the results of multiple scientific studies addressing the same question, with each individual study reporting measurements that are expected to have some degree of error.
+- Target
+ + Pool the estimates from individual studies
+ + Obtain inference for estimate
+- Challange in statiatics
+ + Aggregate findings across studies
+ + Evaluate heterogeneity
+ + Conduct sensitivity and subgroup analyses
+
+---
+# Meta Analysis
+## Real Value Case
+- *metacont*: Calculation of fixed and random effects estimates for meta-analyses with continuous outcome data; inverse variance weighting is used for pooling.
+
+```r
+library(meta)
+data("Fleiss1993cont")
+```
+&lt;figure&gt;
+  &lt;img src="fleiss.png",width="800",height="200"&gt;
+&lt;/figure&gt;
+- *n.psyc*:	number of observations in psychotherapy group
+- *mean.psyc*:	estimated mean in psychotherapy group
+- *sd.psyc*:	standard deviation in psychotherapy group
+
+
+---
+# Meta Analysis
+
+```r
+# meta-analysis with continuout outcome
+# comb.fixed/comb.random: indicator whether a fix/random effect mata-analysis to be conducted.
+# sm: Three different types of summary measures to choose,standardized mean difference (SMD),mean difference (MD), ratio of means (ROM)
+res.flesiss =  metacont(n.psyc, mean.psyc, sd.psyc, 
+                        n.cont, mean.cont, sd.cont,
+                        comb.fixed = T, comb.random = T, studlab = study,
+                        data = Fleiss1993cont, sm = "SMD") 
+
+res.flesiss
+```
+&lt;figure&gt;
+  &lt;img src="fleiss_s.png",width="800",height="160"&gt;
+&lt;/figure&gt;
+
+---
+# Meta Analysis
+
+```r
+forest(res.flesiss, leftcols = c('studlab'))
+```
+&lt;figure&gt;
+  &lt;img src="fleiss1.png",width="800",height="160"&gt;
+&lt;/figure&gt;
+- According to the pooled results of meta-analysis, both fixed and random effects models yield a significant benefit of the intervention group against the control group (for the days of hospital stay, the lower, the better).
+- Based on `\(I^2=0\)`, estimated between-study variance `\(\tau^2=0\)`, `\(p\)`-value =0.45 for the Cochran’s Q test, there was no heterogeneity.
+
+
+---
+# Meta Analysis
+- Use *funnel* to obtain funnel plot.
+
+```r
+# Funnel plot
+funnel(res.flesiss)
+```
+
+![](T9_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+# Meta Analysis
+- *metabias*: Test for funnel plot asymmetry, based on rank correlation or linear regression method.
+- Use Egger's test to check publication bias, can take string 'Egger' or 'linreg'.
+
+```r
+metabias(res.flesiss, method.bias = 'linreg', k.min = 5, plotit = T)
+```
+&lt;figure&gt;
+  &lt;img src="Egger1.png" width="60%"&gt;
+&lt;/figure&gt;
+
+.pull-left[
+&lt;figure&gt;
+  &lt;img src="Egger2.png"&gt;
+&lt;/figure&gt;
+]
+.pull-right[
+`\(p\)`-value=0.973&gt;0.05 =&gt; no publication bias
+However, this meta-analysis contains `\(k = 5\)` studies. Egger's test may lack the statistical power to detect bias when the number of studies is small (i.e., `\(k&lt;10\)`).
+]
+
+---
+# Meta Analysis
+## Binary case
+- What if we record binary outcome from each individual studies? 
+
+```r
+load("binarydata.RData")
+str(binarydata)
+```
+
+```
+## Classes 'tbl_df', 'tbl' and 'data.frame':	11 obs. of  5 variables:
+##  $ Author: chr  "Alcorta-Fleischmann" "Craemer" "Eriksson" "Jones" ...
+##  $ Ee    : num  2 18 6 3 0 8 12 1 7 17 ...
+##  $ Ne    : num  279 1273 1858 297 300 ...
+##  $ Ec    : num  1 17 5 6 1 9 12 10 8 21 ...
+##  $ Nc    : num  70 1287 1852 314 295 ...
+```
+- Author:	This signifies the column for the study label (i.e., the first author)
+- Ee:	Number of events in the experimental treatment arm
+- Ne:	Number of participants in the experimental treatment arm
+- Ec:	Number of events in the control arm
+- Nc:	Number of participants in the control arm
+
+---
+# Meta Analysis
+- Use *metabin* to do the calculation.
+- As we want to have a pooled effect for binary data, we have to choose another summary measure now. We can choose from “OR” (Odds Ratio), “RR” (Risk Ratio), or RD (Risk Difference), among other things.
+- *method*: indicating which method is to be used for pooling of studies. 
+
+```r
+m.bin &lt;- metabin(Ee,Ne,Ec,Nc,
+                 data = binarydata,
+                 studlab = paste(Author),
+                 comb.fixed = T,comb.random = T,
+                 method = 'MH',sm = "RR") # Mantel Haenszel weighting
+```
+&lt;figure&gt;
+  &lt;img src="binary1.png" width="80%"&gt;
+&lt;/figure&gt;
+
+
+---
+# Meta Analysis
+
+```r
+forest(m.bin, leftcols = c('studlab'))
+```
+&lt;figure&gt;
+  &lt;img src="binary2.png" width="600",height="160"&gt;
+&lt;/figure&gt;
+
+---
+# Meta Analysis
+- Similarly, plot funnel figure and do Egger's test.
+.pull-left[
+
+```r
+funnel(m.bin)
+```
+
+![](T9_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+]
+.pull-right[
+
+```r
+metabias(m.bin, method.bias = 'linreg', plotit = T)
+```
+
+![](T9_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+&lt;figure&gt;
+  &lt;img src="biegger.png" &gt;
+&lt;/figure&gt;
+]
+
+
+---
+#Network Meta Analysis
+- Limitation of Conventional Meta Analysis: can only conduct pariwise comparision, fail to include multi-arm trials.
+- NMA: compare three or more interventions simultaneously in a single analysis by combining both direct and indirect evidence across a network of studies.
+&lt;figure&gt;
+  &lt;img src="nma1.png" &gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+- Procedure under Frequentist framework for fixed effect
+&lt;figure&gt;
+  &lt;img src="nma2.png"  width="600",height="120" &gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+  &lt;img src="nma3.png"  width="600",height="120"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+- Procedure under Frequentist framework for random effect
+&lt;figure&gt;
+  &lt;img src="nma4.png"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+- *netmeta* package: network meta-analysis using frequentist methods 
+
+```r
+library(netmeta)
+data(Linde2015)
+head(Linde2015)
+```
+&lt;figure&gt;
+  &lt;img src="linde1.png"&gt;
+&lt;/figure&gt;
+
+&lt;!-- id: label of study --&gt;
+&lt;!-- treatment1, treatment2, treatment3 (might be NA): first, second and third treatment groups in each study --&gt;
+&lt;!-- `\(n_i\)`: number of patients in group `\(i\)` --&gt;
+&lt;!-- resp$i$: number of events in group `\(i\)` --&gt;
+
+---
+#Network Meta Analysis
+- *pairwise*: Transform arm-level binary data to treatment difference estimates of two-arm comparisons for each individual studies.
+- *sm = "OR"*: take *Odds ratio* as measures of treatment effect
+
+```r
+Linde.te &lt;- pairwise(list(treatment1, treatment2, treatment3), 
+               event = list(resp1, resp2, resp3), 
+               n = list(n1, n2, n3), studlab = id, 
+               data = Linde2015, sm = "OR") 
+head(Linde.te) 
+```
+&lt;figure&gt;
+  &lt;img src="linde_te.png"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+- *netmeta* function: a generalisation of pairwise meta-analysis that compares all pairs of treatments within a number of treatments.
+- *TE*: treatment estimate between *treat1* and *treat2*.
+- *reference.group*: take the reference group for measure of treatmen effect.  (Try to use other reference group)
+
+```r
+Linde.net = netmeta(TE = TE, seTE = seTE, treat1 = treat1,
+                    treat2 = treat2, studlab = studlab,
+                    data = Linde.te, 
+                    comb.fixed = T, comb.random = T, 
+                    reference.group = "Placebo") 
+```
+
+---
+#Network Meta Analysis
+## Output of *netmeta*
+- Original data (with adjusted standard errors for multi-arm studies)
+&lt;figure&gt;
+  &lt;img src="linde_od.png"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+## Output of *netmeta*
+- Treatment effect estimate
+&lt;figure&gt;
+  &lt;img src="linde_fix.png"&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+  &lt;img src="linde_rad.png"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+## Output of *netmeta*
+- Heterogeneity/Inconsistency test
+&lt;figure&gt;
+  &lt;img src="linde_heter.png"&gt;
+&lt;/figure&gt;
+&lt;figure&gt;
+  &lt;img src="linde_heter1.png"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+## Network plot
+- *netgraph*: Generic function for network graphs
+
+```r
+netgraph(Linde.net, plastic = F, thickness = "number.of.studies", col = 'black')
+```
+&lt;figure&gt;
+  &lt;img src="linde_netplot.png" width="80%"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+## forest plot for fix effect
+
+```r
+forest(Linde.net, reference.group = 'Placebo', 
+       pooled = 'fixed', leftcols = c('studlab', 'effect', 'effect.ci'), rightcols = F)
+```
+&lt;figure&gt;
+  &lt;img src="linde_forest_fix.png" width="80%"&gt;
+&lt;/figure&gt;
+
+
+---
+#Network Meta Analysis
+## forest plot for random effect
+
+```r
+forest(Linde.net, reference.group = 'Placebo', 
+       pooled = 'random', leftcols = c('studlab', 'effect', 'effect.ci'), rightcols = F)
+```
+&lt;figure&gt;
+  &lt;img src="linde_forest_rad.png" width="80%"&gt;
+&lt;/figure&gt;
+
+---
+#Network Meta Analysis
+- *netleagu*: creates square matrix showing all pairwise comparisons with their CIs in a network meta-analysis
+
+```r
+Linde.netleague &lt;- netleague(Linde.net, bracket = "(", digits=2)
+Linde.netleague$fixed # network estimates in lower triangle, direct estimates in upper triangle
+```
+&lt;figure&gt;
+  &lt;img src="linde_matrix_fix.png" width="80%"&gt;
+&lt;/figure&gt;
+
+- Can also run 
+
+```r
+Linde.netleague$random
+```
+---
+#Network Meta Analysis
+- *netsplit*: splits network estimates into the contribution of direct and indirect evidence 
+
+```r
+Linde.net.split = netsplit(Linde.net, reference.group = "Placebo", 
+                           baseline.reference = T, 
+                           comb.fixed = T, comb.random = T)
+head(Linde.net.split$fixed)
+```
+&lt;figure&gt;
+  &lt;img src="linde_split1.png" width="70%"&gt;
+&lt;/figure&gt;
+- *comparison* - Treatment comparison; *k* - Number of studies providing direct evidence
+- *prop* - Direct evidence proportion; *nma* - Estimated treatment effect (OR) in network meta-analysis
+- *direct* - Estimated treatment effect (OR) derived from direct evidence
+- *indir* - Estimated treatment effect (OR) derived from indirect evidence
+- *RoR* - Ratio of Ratios (direct versus indirect)
+- *z* - z-value of test for disagreement (direct versus indirect); `\(p\)`-value - p-value of test for disagreement (direct versus indirect)
+
+
+---
+#Network Meta Analysis
+- Can also call the *forest* function to plot:  
+
+```r
+forest(Linde.net.split, pooled = 'fixed')
+```
+.pull-left[
+&lt;figure&gt;
+  &lt;img src="split_forest_fix.png" &gt;
+&lt;/figure&gt;
+]
+.pull-right[
+&lt;figure&gt;
+  &lt;img src="split_forest_fix2.png" &gt;
+&lt;/figure&gt;
+]
+
+---
+#Network Meta Analysis
+
+```r
+forest(Linde.net.split, pooled = 'random')
+```
+.pull-left[
+&lt;figure&gt;
+  &lt;img src="split_forest_rad.png" &gt;
+&lt;/figure&gt;
+]
+.pull-right[
+&lt;figure&gt;
+  &lt;img src="split_forest_rad2.png" &gt;
+&lt;/figure&gt;
+]
+
+---
+#Network Meta Analysis
+## treatment ranking
+- *netrank*: rank treatments in frequentist network meta-analysis without resampling methods.
+- return `\(P\)`-score: The `\(P\)`-score of treatment `\(i\)` is defined as the mean of all `\(1 - P_j\)` where `\(P_j\)` denotes the one-sided `\(p\)`-value of accepting the alternative hypothesis that treatment `\(i\)` is better than one of the competing treatments `\(j\)`, can be interpreted as the mean extent of certainty that treatment `\(i\)` is better than another treatment. 
+
+```r
+Linde.rank=netrank(Linde.net, small.values = 'bad')
+barplot(rbind(Linde.rank$Pscore.fixed,Linde.rank$Pscore.random), 
+        beside = T, ylab = 'P-scores', ylim = c(0,1), las = 2)
+```
+.pull-left[
+&lt;figure&gt;
+  &lt;img src="linde_rank.png" &gt;
+&lt;/figure&gt;
+]
+.pull-right[
+&lt;figure&gt;
+  &lt;img src="linde_rank1.png" &gt;
+&lt;/figure&gt;
+]
+---
+class: center, middle 
+# Q&amp;A
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

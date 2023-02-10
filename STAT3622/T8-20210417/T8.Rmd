@@ -1,0 +1,362 @@
+---
+title: "Tutorial 8: Web Scraping and Financial Data Visualization"
+author: "Mr. Zebin Yang"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: 
+      - default
+      - default-fonts
+      - duke-blue
+      - hygge-duke
+      - libs/cc-fonts.css
+      - libs/figure-captions.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE, fig.align='center', message = F, fig.height= 4, fig.width=6}
+options(htmltools.dir.version = FALSE)
+options(warn=-1)
+```
+
+# Outline
+
+- Web Scraping 
+
+- Financial Data Visualization
+
+---
+# Web Scraping
+## Scrape by Rvest
+```{r}
+# General-purpose data wrangling
+suppressMessages(library(tidyverse))
+# Parsing of HTML/XML files  
+suppressMessages(library(rvest))
+suppressMessages(library(XML))
+```
+
+---
+# Web Scraping
+## Scrape by Rvest
+```{r}
+url <-'https://brandirectory.com/rankings/global/2021/table'
+webpage <- read_html(url)
+xdata <- webpage %>% html_nodes("tbody tr")
+DataX = NULL
+for (i in 1:length(xdata)){
+  tmp <- xdata[i] %>% html_nodes("td")
+  rank21 <- tmp[1] %>% html_text()  %>% as.numeric()
+  rank20 <- tmp[2] %>% html_text()  %>% as.numeric()
+  company = trimws(gsub("\n", "", tmp[3] %>% html_text()))
+  country = trimws(gsub("\n", "", tmp[4] %>% html_text()))
+  flag <- tmp[5] %>% html_nodes("img") %>% xml_attr("src")
+  value21 <- tmp[5] %>% html_nodes("span") %>% html_text()
+  value20 <- tmp[6] %>% html_nodes("span") %>% html_text()
+  rate21 = trimws(gsub("\n", "", tmp[7] %>% html_text()))
+  rate20 = trimws(gsub("\n", "", tmp[8] %>% html_text()))
+  DataX = rbind(DataX, c(rank21, rank20,company, country,
+                         value21, value20, rate21, rate20))
+  }
+```
+
+---
+## Scrape by Rvest
+```{r}
+head(DataX)
+```
+
+---
+## Practice - SP500 Index
+```{r}
+library(RCurl)
+url = "https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC"
+doc <- getURL(url)
+doc <- htmlParse(doc,useInternal=TRUE, encoding="UTF-8")
+```
+
+---
+## Practice - SP500 Index
+```{r}
+path_root = '//*[@id="Col1-1-HistoricalDataTable-Proxy"]/section/div[2]/table/tbody/tr'
+Date = xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[1]/span', sep =""))
+Open = as.numeric(gsub(",","", xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[2]/span', sep =""))))
+High = as.numeric(gsub(",","", xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[3]/span', sep =""))))
+Low = as.numeric(gsub(",","", xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[4]/span', sep =""))))
+Close = as.numeric(gsub(",","", xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[5]/span', sep =""))))
+Adj_Close = as.numeric(gsub(",","", xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[6]/span', sep =""))))
+Volume = as.numeric(gsub(",","", xpathSApply(doc, fun = xmlValue,
+       path = paste(path_root, '/td[7]/span', sep =""))))
+SP500 = data.frame(Date, Open, High, Low, Close, Adj_Close, Volume)
+```
+
+---
+## Practice - SP500 Index
+```{r, eval = F}
+require(devtools)
+install_github("Displayr/flipTime")
+```
+
+```{r}
+library(flipTime)
+SP500 = SP500[sort(SP500$Date, T),]
+SP500$Date = AsDate(SP500$Date)
+head(SP500)
+```
+
+---
+## Practice - SP500 Index
+```{r, message = F}
+library(plotly)
+p1 = SP500 %>% plot_ly(x = ~Date, type="candlestick",   
+        open = ~Open, close = ~Close, 
+        high = ~High, low = ~Low, name = "SP500") %>% 
+  layout(title = "Candlestick Chart")
+p2 = SP500  %>%
+  plot_ly(x=~Date, y=~Volume, type='bar',
+          orientation = 'v', name = "Volume") %>%
+    layout(yaxis = list(title = "Volume"))
+p <- subplot(p1, p2, heights = c(0.7,0.2), nrows=2,
+             shareX = TRUE, titleY = TRUE) %>%
+  layout(title = "SP500",
+         xaxis = list(rangeslider = list(visible = F)))
+```
+
+---
+## Practice - SP500 Index
+```{r, echo = F, fig.width= 11}
+p
+```
+
+
+---
+# Financial Data Visualization
+## Obtain Data
+```{r warning=FALSE, message = F}
+library(quantmod)
+k <- 3 # how many years back?
+end<- format(Sys.Date(),"%Y-%m-%d")
+start<-format(Sys.Date() - (k*365), "%Y-%m-%d")
+symetf = c('ACTG', 'AEO', 'AGFS', 'AGNC', 'AGX')
+l <- length(symetf)
+w0 <- NULL
+for (i in 1:l){
+dat0 = getSymbols(symetf[i],  from=start,
+                  to=end, auto.assign = FALSE)
+w1 <- weeklyReturn(dat0)
+w0 <- cbind(w0,w1)
+}
+time <- as.Date(substr(index(w0),1,10))
+w0 <- as.matrix(w0)
+colnames(w0) <- symetf
+```
+
+---
+## Split Data 
+- Let's split the sample in two parts
+- Create a portfolio based on first part and 
+- See how it is doing in the second part
+```{r}
+t_insample <- NROW(w0)/2
+tmpind <- 1:t_insample
+w0_insample <- w0[tmpind, ]
+w0_outsample <- w0[-tmpind, ]
+```
+
+---
+## Portfolio Models
+```{r, message = F, warning=F, eval = F}
+library('FRAPO')   # install if not yet, using install.packages
+# Equal Risk Contribution
+ERC <- PERC(Sigma=cov(w0_insample))@weights
+# Global Minimum Variance 
+GB <- PGMV(Returns=w0_insample)@weights
+# Minimum Tail-Dependence 
+MTD <- PMTD(Returns=w0_insample)@weights
+# Most Diversified
+MD <- PMD(Returns=w0_insample)@weights
+```
+
+```{r, message = F, warning=F, echo = F}
+library('FRAPO')   # install if not yet, using install.packages
+# Equal Risk Contribution
+ERC <- PERC(Sigma= cov(w0_insample))@weights
+# Global Minimum Variance 
+GB <- PGMV(Returns= w0_insample)@weights
+# Minimum Tail-Dependence 
+MTD <- PMTD(Returns= w0_insample)@weights
+# Most Diversified
+MD <- PMD(Returns= w0_insample)@weights
+```
+
+---
+## Portfolio Models
+```{r, warning=F, message=F, fig.height=4}
+library(plotly)
+plot_ly(data.frame(cbind(ERC, GB, MTD, MD), stock = names(ERC))) %>% 
+      add_trace(x = ~stock , y = ~ERC, type = 'bar', name = 'ERC') %>%
+      add_trace(x = ~stock, y = ~ GB, type = 'bar', name = 'GB') %>% 
+      add_trace(x = ~stock, y = ~ MTD, type = 'bar', name = 'MTD') %>% 
+      add_trace(x = ~stock , y = ~ MD, type = 'bar', name = 'MD') %>%
+  layout(yaxis = list(title = 'Count'), barmode = 'stack')
+```
+
+
+---
+## Performance Accumulative Returns
+```{r}
+tmp_tab <- data.frame(cbind(ERC, GB, MTD, MD))
+returns <-  w0_outsample %*% as.matrix(cbind(tmp_tab/100, 1/l))
+cum_ret <- matrix(nrow= NROW(returns), ncol= NCOL(returns) )
+for(j in 1:NCOL(returns)) 
+{
+  for( i in 1: NROW(returns) ) {
+    cum_ret[i, j] <- prod( (1+returns[1:i,j]) ) - 1
+  } 
+}
+cum_ret = as.data.frame(cum_ret)
+colnames(cum_ret) = c('ERC', 'GB', 'MTD', 'MD', "Equal")
+cum_ret$index = rownames(w0_outsample)
+p = cum_ret %>% plot_ly(x = ~index, y=~ERC, type = 'scatter', 
+                    mode = 'lines', name = 'ERC') %>% 
+          add_trace(x = ~index, y=~GB, type = 'scatter', 
+                    mode ='lines', name = 'GB') %>%
+          add_trace(x = ~index, y=~MTD, type = 'scatter', 
+                    mode ='lines', name = 'MTD') %>%
+          add_trace(x = ~index, y=~MD, type = 'scatter', 
+                    mode ='lines', name = 'MD') %>%
+          add_trace(x = ~index, y=~Equal, type = 'scatter', 
+                    mode ='lines', name = 'Equal') %>%
+  layout(title = "Accumulative Returns", yaxis = list(title = ""))
+```
+
+---
+## Performance Accumulative Returns
+```{r, echo = F, fig.width=10}
+p
+```
+
+---
+## Performance Returns Distribution
+```{r, warning=F, message=F, warning = F, fig.height= 3, fig.width=10}
+library(PerformanceAnalytics)
+par(mfrow = c(1, 5))
+chart.Histogram(returns[,1], methods = 
+                c("add.density", "add.normal"), main = "ERC")
+chart.Histogram(returns[,2], methods = 
+                c("add.density", "add.normal"), main = "GB")
+chart.Histogram(returns[,3], methods = 
+                c("add.density", "add.normal"), main = "MTD")
+chart.Histogram(returns[,4], methods = 
+                c("add.density", "add.normal"), main = "MD")
+chart.Histogram(returns[,5], methods = 
+                c("add.density", "add.normal"), main = "Equal")
+```
+
+---
+## Performance Returns Distribution
+```{r}
+Normality = NULL
+for (i in 1:5)
+{
+  Normality=rbind(Normality, c(skewness(returns[,i]), 
+                               kurtosis(returns[,i])))
+} 
+colnames(Normality) = c("skewness", "kurtosis")
+rownames(Normality) = c("ERC", "GB", "MTD", "MD", "Equal")
+Normality
+```
+
+---
+## Performance - Correlation 
+```{r, fig.height=6}
+chart.Correlation(returns)
+```
+
+---
+## Performance - Sharpe Ratio
+```{r, fig.height=4}
+risk_free = 0.03/52
+excess_return <- returns - risk_free
+sharpe_ratio = sqrt(52)*(excess_return %>% 
+               apply(2, mean))/(excess_return %>% apply(2, sd))
+x <- c("ERC", "GB", "MTD", "MD", "Equal")
+plot_ly(data.frame(sharpe_ratio)) %>% 
+      add_trace(x=~x, y = ~sharpe_ratio, type = 'bar') %>%
+  layout(title = "Sharpe Ratio")
+```
+
+---
+## Performance - DrawDown
+```{r, warning = F, fig.height= 4, fig.width=10}
+par(mfrow = c(1, 5))
+chart.Drawdown(returns[,1], main = "ERC")
+chart.Drawdown(returns[,2], main = "GB")
+chart.Drawdown(returns[,3], main = "MTD")
+chart.Drawdown(returns[,4], main = "MD")
+chart.Drawdown(returns[,5], main = "Equal")
+```
+
+---
+## Efficient Frontier
+```{r, message=F, warning=F}
+library(tseries)
+library(data.table)
+df_table <- melt(data.table(w0_insample))[, .(er = mean(value),
+                               sd = sd(value)), by = variable]
+er_vals <- seq(from = min(df_table$er), to = max(df_table$er),
+               length.out = 1000)[2:1000]
+sd_vals <- sapply(er_vals, function(er) {
+op <- portfolio.optim(as.matrix(w0_insample), er)
+return(op$ps)
+})
+
+plot_dt <- data.table(sd = sd_vals, er = er_vals)
+minsd <- min(plot_dt$sd)
+minsd_er <- plot_dt[sd == minsd, er]
+plot_dt[, efficient := er >= minsd_er]
+```
+
+---
+## Efficient Frontier
+```{r, eval = F}
+library(ggplot2)
+ggplot() +
+geom_point(data = plot_dt[efficient == FALSE],
+           aes(x = sd, y = er), size = 0.5, color = "blue") +
+geom_point(data = plot_dt[efficient == TRUE], 
+           aes(x = sd, y = er), size = 0.5, color = "red") +
+geom_point(data = df_table, aes(x = sd, y = er),
+           size = 4, color = "red", shape = 18) +
+theme_bw() + ggtitle("Efficient Frontier without Short-Selling") +
+xlab("Volatility") + ylab("Expected Returns")
+```
+
+
+---
+## Efficient Frontier
+```{r, echo=F, warning = F, fig.height= 6}
+library(ggplot2)
+ggplot() +
+geom_point(data = plot_dt[efficient == FALSE],
+           aes(x = sd, y = er), size = 0.5, color = "blue") +
+geom_point(data = plot_dt[efficient == TRUE], 
+           aes(x = sd, y = er), size = 0.5, color = "red") +
+geom_point(data = df_table, aes(x = sd, y = er),
+           size = 4, color = "red", shape = 18) +
+theme_bw() + ggtitle("Efficient Frontier without Short-Selling") +
+xlab("Volatility") + ylab("Expected Returns")
+```
+
+
+---
+class: center, middle 
+# Q&A

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT3622 Data Visualization (with Python)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content=" Wenbin Du  The University of Hong Kong" />
+    <meta name="date" content="2021-03-01" />
+    <script src="libs/header-attrs-2.6/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="stat3622-style.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT3622 Data Visualization (with Python)
+## Lecture 6
+### <br>Wenbin Du<br> The University of Hong Kong
+### 1 March 2021
+
+---
+
+# Plotly
+
+- The plotly Python library (https://plotly.com/python/) is an interactive, open-source plotting library that supports over 40 unique chart types covering a wide range of statistical, financial, geographic, scientific, and 3-dimensional use-cases.
+
+- Built on top of the Plotly JavaScript library (plotly.js), plotly enables Python users to create beautiful interactive web-based visualizations that can be displayed in Jupyter notebooks, saved to standalone HTML files.
+&lt;center class="half"&gt;
+    &lt;img src="plotly.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+# Installation
+
+plotly may be installed using pip:
+
+- $ pip install plotly
+
+or conda:
+
+- $ conda install -c plotly plotly
+---
+# Plotly
+```python
+import plotly.graph_objects as go
+import numpy as np
+
+x = np.arange(10)
+fig = go.Figure(data=go.Scatter(x=x, y=x**2))
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_pline1.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+## Plotly
+```python
+import plotly.graph_objects as go
+
+# Create random data with numpy
+import numpy as np
+np.random.seed(1)
+
+N = 100
+random_x = np.linspace(0, 1, N)
+random_y0 = np.random.randn(N) + 5
+random_y1 = np.random.randn(N)
+random_y2 = np.random.randn(N) - 5
+
+# Create traces
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+                    mode='lines',
+                    name='lines'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+                    mode='lines+markers',
+                    name='lines+markers'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y2,
+                    mode='markers', name='markers'))
+fig.show()
+```
+---
+## Plotly
+&lt;center class="half"&gt;
+    &lt;img src="l6_pline2.png" width="75%"/&gt;
+&lt;/center&gt;
+---
+## Interactive charts
+&lt;center class="half"&gt;
+    &lt;img src="l6_inter.png" width="83%"/&gt;
+&lt;/center&gt;
+---
+## Interactive charts
+- Box selecting or lasso selecting for highlight
+&lt;center class="half"&gt;
+    &lt;img src="l6_inter1.png" width="50%"/&gt;&lt;img src="l6_inter_lasso.png" width="50%"/&gt;
+&lt;/center&gt;
+---
+## Interactive charts
+- Use zoom to show data in different scales
+&lt;center class="half"&gt;
+    &lt;img src="l6_inter_zoom.png" width="50%"/&gt;&lt;img src="l6_inter_zoom1.png" width="50%"/&gt;
+&lt;/center&gt;
+---
+## Interactive charts
+- Click the legend to show subsets of the data
+&lt;center class="half"&gt;
+    &lt;img src="l6_pline2.png" width="50%"/&gt;&lt;img src="l6_inter_part.png" width="50%"/&gt;
+&lt;/center&gt;
+---
+## Editing line style
+```python
+import plotly.graph_objects as go
+
+# Create random data with numpy
+import numpy as np
+np.random.seed(1)
+N = 100
+random_x = np.linspace(0, 1, N)
+random_y0 = np.random.randn(N) + 5
+random_y1 = np.random.randn(N)
+random_y2 = np.random.randn(N) - 5
+# Create traces
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+                    mode='lines',
+                    name='lines'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+                    mode='lines+markers',
+                    name='lines+markers',line = dict(color='firebrick', width=4, dash='dot'))))
+fig.show()
+```
+---
+## Editing line style
+
+&lt;center class="half"&gt;
+    &lt;img src="l6_pline3.png" width="75%"/&gt;
+&lt;/center&gt;
+---
+## Editing line style
+```python
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+                    mode='lines',
+                    name='lines'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+                    mode='lines+markers',
+                    name='lines+markers',
+                    line = dict(color='firebrick', width=4, dash='dot')))
+fig.update_layout(title='Example 1',
+                   xaxis_title='X axis',
+                   yaxis_title='Y axis')
+fig.show()
+```
+---
+## Editing line style
+&lt;center class="half"&gt;
+    &lt;img src="l6_pline4.png" width="75%"/&gt;
+&lt;/center&gt;
+---
+## Adding text
+```python
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+                    mode='lines',
+                    name='lines'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+                    mode='lines+markers',
+                    name='lines+markers',
+                    line = dict(color='firebrick', width=4, dash='dot')))
+fig.update_layout(title='Example 1',
+                   xaxis_title='X axis',
+                   yaxis_title='Y axis',
+                 )
+annotations_text = []
+annotations_text.append(dict(x=0.5, y=2.8,
+                              text='STAT_3622',
+                              font=dict(family='Arial',
+                                        size=30,
+                                        color='red'),
+                              showarrow=False))
+fig.update_layout(annotations=annotations_text)
+fig.show()
+```
+---
+## Adding text
+
+&lt;center class="half"&gt;
+    &lt;img src="l6_text.png" width="75%"/&gt;
+&lt;/center&gt;
+
+---
+# Saving as html files
+```python
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+                    mode='lines',
+                    name='lines'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+                    mode='lines+markers',
+                    name='lines+markers',
+                    line = dict(color='firebrick', width=4, dash='dot')))
+fig.update_layout(title='Example 1',
+                   xaxis_title='X axis',
+                   yaxis_title='Y axis')
+fig.show()
+*fig.write_html("fig.html")
+```
+---
+# Plotly Express
+- The plotly.express module (usually imported as px) contains functions that can create entire figures at once, and is referred to as Plotly Express or PX. 
+- Plotly Express is a built-in part of the plotly library, and is the recommended starting point for creating most common figures. 
+
+- Every Plotly Express function uses graph objects internally and returns a plotly.graph_objects.Figure instance. 
+
+- Throughout the plotly documentation, you will find the Plotly Express way of building figures at the top of any applicable page, followed by a section on how to use graph objects to build similar figures. 
+
+- Plotly Express provides more than 30 functions for creating different types of figures. The API for these functions was carefully designed to be as consistent and easy to learn as possible, making it easy to switch from a scatter plot to a bar chart to a histogram to a sunburst chart throughout a data exploration session. 
+---
+# Plotly Express
+ - Plotly Express (https://plotly.com/python/plotly-express/) currently includes the following functions:
+ 
+ 
+&lt;left class="half"&gt;
+    &lt;img src="l6_fig07.png" width="75%"/&gt;
+&lt;/left&gt;
+---
+
+# Plotly Express
+```python
+import plotly.express as px
+df = px.data.iris()
+fig = px.scatter(df, x="sepal_width", y="sepal_length")
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig09.png" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Setting color and size
+```python
+import plotly.express as px
+df = px.data.iris()
+fig = px.scatter(df, x="sepal_width", y="sepal_length", color="species",
+                 size='petal_length')
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig10.png" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Hover Informtion
+```python
+import plotly.express as px
+df = px.data.iris()
+fig = px.scatter(df, x="sepal_width", y="sepal_length", color="species",
+                 size='petal_length', hover_data=['petal_width'])
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig11.png" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Plotly Express
+```python
+import pandas as pd
+import plotly.express as px
+df = px.data.tips()
+fig = px.pie(df, values='tip', names='day', color="day", hole=0.3)
+fig.update_traces(textinfo="label+percent", insidetextfont=dict(color="white"))
+fig.update_layout(legend={"itemclick":False})
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_pie.png" width="55%"/&gt;
+&lt;/center&gt;
+---
+# Plotly Express: Voilin
+```python
+import plotly.express as px
+import plotly.graph_objects as go
+# Violin Plot is a combination of the boxplot and KDE
+# While a box plot corresponds to data points, the violin plot uses the KDE estimation
+# of the data points
+df_tips = px.data.tips()
+fig1 = px.violin(df_tips, y="tip", x="smoker", color="sex", box=True, 
+          hover_data=df_tips.columns)
+fig1
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_violin.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+# Plotly Express: Voilin
+```python
+import plotly.express as px
+# Code source: https://github.com/derekbanas/plotly-tutorial/blob/master/Plotly%20Tut.ipynb
+# Allows us to create graph objects for making more customized plots
+import plotly.graph_objects as go
+# Violin Plot is a combination of the boxplot and KDE
+# While a box plot corresponds to data points, the violin plot uses the KDE estimation
+# of the data points
+df_tips = px.data.tips()
+px.violin(df_tips, y="total_bill", box=True, points='all')
+# Morph left and right sides based on if the customer smokes
+fig = go.Figure()
+fig.add_trace(go.Violin(x=df_tips['day'][ df_tips['smoker'] == 'Yes'],
+                        y=df_tips['total_bill'][ df_tips['smoker'] == 'Yes'],
+                        name='Yes',side='negative',
+                        line_color='blue'))
+fig.add_trace(go.Violin(x=df_tips['day'][ df_tips['smoker'] == 'No'],
+                        y=df_tips['total_bill'][ df_tips['smoker'] == 'No'],
+                        name='No',
+                        side='positive',
+                        line_color='red'))
+fig.show()
+```
+---
+# Plotly Express: Voilin
+&lt;center class="half"&gt;
+    &lt;img src="l6_violin1.png" width="75%"/&gt;
+&lt;/center&gt;
+---
+# More examples: Ternary 
+- Ternary plots are a way of simply showing any variable that contains three categories. The abundance of each must add together to 100%. 
+- They are popular in geology, chemistry and food science – all areas where people deal with mixtures. At each corner of the triangle, we ﬁnd 100% or one of the categories and 0% of the others.
+- Here we use px.scatter_ternary to visualize the three-way split between the three major candidates in an election.
+```python
+import plotly.express as px
+df = px.data.election()
+df.head()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig05_2.png" width="30%"/&gt;
+&lt;/center&gt;
+---
+## Ternary
+- Here we use px.scatter_ternary to visualize the three-way split between the three major candidates in an election.
+```python
+import plotly.express as px
+df = px.data.election()
+fig = px.scatter_ternary(df, a="Joly", b="Coderre", c="Bergeron", hover_name="district",
+    color="winner", size="total", size_max=15)
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig05_1.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+## Ternary
+- Here we use px.scatter_ternary to visualize the three-way split between the three major candidates in an election.
+```python
+import plotly.express as px
+df = px.data.election()
+fig = px.scatter_ternary(df, a="Joly", b="Coderre", c="Bergeron", hover_name="district",
+    color="winner", size="total", size_max=15)
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig05_3.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+## Ternary
+- Here we use px.scatter_ternary to visualize the three-way split between the three major candidates in an election.
+```python
+import plotly.express as px
+df = px.data.election()
+fig = px.scatter_ternary(df, a="Joly", b="Coderre", c="Bergeron", hover_name="district",
+    color="winner", size="total", size_max=15,
+    color_discrete_map = {"Joly": "blue", "Bergeron": "green", "Coderre":"red"} )
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig05_4.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+# More examples: Ridgeline
+- A Ridgelineplot (formerly called Joyplot) allows to study the distribution of a numeric variable for several groups. 
+```python
+df_tips = px.data.tips()
+fig=px.violin(df_tips,x="total_bill",y="day",color='day',orientation="h",)
+fig.update_traces(side="positive",width=4,points="False")
+fig.update_layout(xaxis_showgrid=True,yaxis_showgrid=True)
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_ridgeline1.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+# More examples: Area
+- Area: px.area creates a stacked area plot. Each filled area corresponds to one value of the column given by the line_group parameter.
+```python
+df_gapminder = px.data.gapminder()
+fig = px.area(df_gapminder, x="year", y="pop", color="continent", line_group="country")
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="gapminder_head.png" width="45%"/&gt;
+&lt;/center&gt;
+---
+# More examples by Plotly Express
+- Area
+```python
+df_gapminder = px.data.gapminder()
+fig = px.area(df_gapminder, x="year", y="pop", color="continent", line_group="country")
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_fig08.png" width="55%"/&gt;
+&lt;/center&gt;
+---
+# More examples: Sunburst
+- Sunburst plots visualize hierarchical data spanning outwards radially from root to leaves. The sunburst sector hierarchy is determined by the entries in labels (names in px.sunburst) and in parents. The root starts from the center and children are added to the outer rings. 
+- More information: https://plotly.com/python/sunburst-charts/
+&lt;center class="half"&gt;
+    &lt;img src="l6_sunburst1.png" width="83%"/&gt;&lt;img src="l6_sunburst2.png" width="53%"/&gt;
+    &lt;!-- &lt;img src="l6_sunburst2.png" width="33%"/&gt;&lt;img src="l6_sunburst3.png" width="33%"/&gt; --&gt;
+&lt;/center&gt;
+---
+# facet
+```python
+# You can create numerous subplots
+df_tips = px.data.tips()
+px.scatter(df_tips, x="total_bill", y="tip", color="smoker", facet_col="sex")
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_sex.png" width="63%"/&gt;
+&lt;/center&gt;
+---
+# facet
+```python
+# We can line up data in rows and columns
+px.histogram(df_tips, x="total_bill", y="tip", color="sex", facet_row="time", facet_col="day",
+category_orders={"day": ["Thur", "Fri", "Sat", "Sun"], "time": ["Lunch", "Dinner"]})
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_facet.png" width="63%"/&gt;
+&lt;/center&gt;
+---
+# Sankey diagram 
+- A Sankey diagram is a flow diagram, in which the width of arrows is proportional to the flow quantity.
+
+- Sankey diagrams emphasize the major transfers or flows within a system. They help locate the most important contributions to a flow.
+
+- Sankey diagrams are often used in fields of science, especially physics. They are used to represent energy inputs, useful output, and wasted output.
+```python
+import plotly.graph_objects as go
+import plotly.graph_objects as go
+fig = go.Figure(go.Sankey(
+    node = {
+        "label": ["A", "B", "C", "D", "E", "F"]}, 
+    link = {
+        "source": [0, 0, 1, 2, 5, 4, 3, 5],
+        "target": [5, 3, 4, 3, 0, 2, 2, 3],
+        "value": [1, 2, 1, 1, 1, 1, 1, 2]}))
+fig.show()
+```
+---
+# Sankey diagram 
+```python
+import plotly.graph_objects as go
+import plotly.graph_objects as go
+fig = go.Figure(go.Sankey(
+    node = {
+        "label": ["A", "B", "C", "D", "E", "F"]}, 
+    link = {
+        "source": [0, 0, 1, 2, 5, 4, 3, 5],
+        "target": [5, 3, 4, 3, 0, 2, 2, 3],
+        "value": [1, 2, 1, 1, 1, 1, 1, 2]}))
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_sankey1.png" width="48%"/&gt;
+&lt;/center&gt;
+---
+# Sankey diagram 
+
+&lt;center class="half"&gt;
+    &lt;img src="l6_sankey3.png" width="83%"/&gt;
+&lt;/center&gt;
+---
+# Plotly: Animation
+```python
+# Create an animated plot that you can use to cycle through continent
+# GDP &amp; life expectancy changes
+fig = px.scatter(df_gapminder, x='gdpPercap', y='lifeExp', color='continent', size='pop', size_max=40, hover_name='country', log_x=True, animation_frame='year',
+animation_group='country', range_x=[100, 50000], range_y=[25,90])
+fig.show()
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_ani_p1.png" width="53%"/&gt;
+&lt;/center&gt;
+---
+# Animation
+```python
+# Watch as bars chart population changes
+px.bar(df_cnt, x="continent", y="pop", color="continent",hover_name='country',
+  animation_frame="year", animation_group="country", range_y=[0,4000000000])
+```
+&lt;center class="half"&gt;
+    &lt;img src="l6_ani_p2.png" width="53%"/&gt;
+&lt;/center&gt;
+---
+# Tips
+
+Create any chart you want using plotly documentation in three steps for creating powerful graphs &amp; charts with Plotly:
+-	Initiate your graph with Plotly sample code, and adapt it to your data    
+   (https://plotly.com/python/). 
+-	Enhance your graph with Plotly Express High-level Interface       
+  (https://plotly.com/python-api-reference/plotly.express.html)
+-	Customize your graphs with Plotly Graph_Objects, using figure updates                       (https://plotly.com/python/reference/index/)
+	Layout represents the chart (frames, title, color, tick, hover, legend)
+	Traces represents the data (inside the layout)
+	
+	--&gt; update_traces
+	--&gt; update_layout
+  --&gt; update_annotations
+  
+	--&gt; update_yaxes
+	--&gt; update_xaxes
+
+
+For more information: https://www.youtube.com/watch?v=_b2KXL0wHQg
+---
+class: center, middle
+# Thank you! 
+Q&amp;A or Email wbdu@hku.hk
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
