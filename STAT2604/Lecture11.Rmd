@@ -1,0 +1,1069 @@
+---
+title: "Lecture 11"
+output:
+  html_document:
+    df_print: paged
+---
+## Writing R extensions
+
+### Creating R packages
+In R, the fundamental unit of shareable code is the package. A package bundles together code, data, documentation, and tests, and is easy to share with others. Why write a package? One compelling reason is that you have code that you want to share with others. Bundling your code into a package makes it easy for other people to use it, because like you, they already know how to use packages. If your code is in a package, any R user can easily download it, install it and learn how to use it. Organising code in a package makes your life easier because packages come with conventions. For example, you put R code in R/, you put tests in tests/ and you put data in data/. These conventions are helpful because:
+
+* They save you time: you don't need to think about the best way to organize a project, you can just follow a template.
+
+* Standardized conventions lead to standardized tools: if you buy into R's package conventions, you get many tools for free.
+
+It's even possible to use packages to structure your data analyses.
+
+Together, devtools (an R package) and RStudio insulate you from the low-level details of how packages are built. 
+
+
+#### Packages that need to be installed
+Before getting started, we need to install the `devtools` and `roxygen2` packages. The former contains a large bundle of tools needed in package development, while the latter is used to easily write documentation.
+
+
+#### The most basic R package
+Assume that we want to create an R package that includes two functions. The first function will convert temperatures from degrees Fahrenheit to degrees Celsius, while the second function will convert temperatures from degrees Celsius to degrees Fahrenheit. The first thing we need to do is create a new folder somewhere on our computer that will hold the whole R package (there are other ways of doing this, but I am showing the way that I tend to use most often).
+
+
+The above shows the new folder 'SCC_R_package'. For now, this folder is empty. The first thing that we need to do is to create a new folder inside of SCC_R_package called 'R'.
+
+```{r eval=FALSE}
+F_to_C <- function(F_temp){
+    C_temp <- (F_temp - 32) * 5/9;
+    return(C_temp);
+}
+
+C_to_F <- function(C_temp){
+    F_temp <- (C_temp * 9/5) + 32;
+    return(F_temp);
+}
+```
+
+
+Inside this folder is where we will store the actual R scripts with the coded functions. Any number of `.R` files can be included in the folder, and each file can have any number of functions. You could, for example, give each function its own file, or just have one file with many R functions. For large projects, I find it easiest to group similar functions in the same R file. In our new R package, I will write both functions in the same file called `temp_conversion.R`, which has the code below.
+
+The next thing that we need to do is create a new file called 'DESCRIPTION' in the SCC_R_package directory (note, not in 'R', but just outside of it). This will be a plain text file with no extension, and it will hold some of the meta-data on the R package. For now, the whole file is just the following four lines of code, specifying the package name, type, title, and version number.
+
+```{r eval=FALSE}
+Package: SCCTempConverter
+Type: Package
+Title: Temperature Conversion Package for Demonstration
+Version: 0.0.1.0
+```
+
+
+If we really wanted to call it quits, this is technically an R package, albeit an extremely basic one. We could load it using the code above after first reading in the devtools library.
+
+Note that the working directory needs to be set correctly to the R package directory (e.g., using the setwd function, or by choosing Session > Set Working Directory from the pull down menu of RStudio). In doing this, the above functions `F_to_C` and `C_to_F` are now read into R and we can use them to convert temperatures.
+
+```{r eval=FALSE}
+library("devtools")
+load_all(".") # Working directory should be in the package SCC_R_package
+F_to_C(79);
+C_to_F(20);
+```
+This is not a good stopping point for writing a package though, because we really should include some sort of documentation explaining what the package is for and helping users know what functions do.
+
+
+#### Making a new R project
+To get started on a proper R package complete with documentation, the best thing to do is to create a new R project. To do this in Rstudio, go to `File > New Project...`; the box below should pop up.
+
+Note that we could have started with a project right away, creating a new folder with the New Directory option. Instead, we will create the project in our Existing Directory, SCC_R_package by choosing the middle option. The following box should appear.
+
+
+The R project is shown above as SCC_R_package.Rproj. Note that there are a couple other new things in the directory above, including .Rproj.user and .Rbuildignore. These are hidden files, so you might not see these in your own directory unless you explicitly ask your computer to show hidden files. The folder .Rproj.user is not really important; it stores some more meta-data about the package development. The file .Rbuildignore is not important for now, but could be useful later; this is just a plain text file that tells R to ignore selected files or folders when building the package (e.g., if we wanted to include a folder for our own purposes that is not needed or wanted for building the package).
+
+
+#### Adding documentation (help files)
+If we want others to use the functions that we have written, we need to provide some documentation for them. Documentation shows up in the 'help' tab of RStudio when running the function help. You can run the following code to see what I mean.
+
+
+You can make one of these helpful markdown files in Rstudio using the roxygen2 package. To do this, we need to add to the functions written in the temp_conversion.R file. The code below shows a simple example.
+
+
+```{r}
+#' Fahrenheit conversion
+#'
+#' Convert degrees Fahrenheit temperatures to degrees Celsius
+#' @param F_temp The temperature in degrees Fahrenheit
+#' @return The temperature in degrees Celsius
+#' @examples 
+#' temp1 <- F_to_C(50);
+#' temp2 <- F_to_C( c(50, 63, 23) );
+#' @export
+F_to_C <- function(F_temp){
+    C_temp <- (F_temp - 32) * 5/9;
+    return(C_temp);
+}
+
+#' Celsius conversion
+#'
+#' Convert degrees Celsius temperatures to degrees Fahrenheit
+#' @param C_temp The temperature in degrees Celsius
+#' @return The temperature in degrees Fahrenheit
+#' @examples 
+#' temp1 <- C_to_F(22);
+#' temp2 <- C_to_F( c(-2, 12, 23) );
+#' @export
+C_to_F <- function(C_temp){
+    F_temp <- (C_temp * 9/5) + 32;
+    return(F_temp);
+}
+
+```
+
+Note that the total length of the code has increased considerably to add in the documentation, but we now have some helpful reminders of how to use each function. The first line (e.g., #' Fahrenheit conversion) shows the function title, with the next line showing the description. Additional tags such as @param and @examples are used to write different subsections of the help file. These are not the only tags available; for more details about the Roxygen format, see [Karl Broman's page](http://kbroman.org/pkg_primer/pages/docs.html or Hadley Wickham's introduction to roxygen2. Using the above format, the roxygen2 package makes it easy to create help files in markdown. All that we need to do is make sure that the project is open and that the working directory is correct (typing getwd() should return the directory of our R package), then run the below in the console.
+
+```{r}
+#library(roxygen2); # Read in the roxygen2 R package
+#roxygenise();      # Builds the help files
+```
+
+Note that two things have been added. The first is a new directory called 'man', which holds the help files that we have written. The second is a plain text file 'NAMESPACE', which works with R to integrate them into the package correctly; you do not need to edit NAMESPACE manually, in fact, the file itself tells you not to edit it. Here are the entire contents of NAMESPACE.
+
+Inside the 'man' folder, there are two new markdown documents, one for each function.
+Both are plain text files. 
+
+We can load the package now and ask for help with `F_to_C`.
+
+#### Building a source package
+
+We can build a source package (i.e., a zipped version of the R package) in Rstudio by selecting Build > Build Source Package. This will create a zipped package outside of the package directory, which would be what we would need to build if we wanted to submit our package to CRAN.
+
+
+#### Package metadata
+The job of the `DESCRIPTION` file is to store important metadata about your package. When you first start writing packages, you'll mostly use these metadata to record what packages are needed to run your package. However, as time goes by and you start sharing your package with others, the metadata file becomes increasingly important because it specifies who can use it (the license) and whom to contact (you!) if there are any problems.
+
+Every package must have a `DESCRIPTION`. In fact, it's the defining feature of a package (RStudio and devtools consider any directory containing `DESCRIPTION` to be a package). To get you started, `devtools::create("mypackage")` automatically adds a bare-bones description file. This will allow you to start writing the package without having to worry about the metadata until you need to. The minimal description will vary a bit depending on your settings, but should look something like this:
+
+```yaml
+Package: mypackage
+Title: What The Package Does (one line, title case required)
+Version: 0.1
+Authors@R: person("First", "Last", email = "first.last@example.com",
+                  role = c("aut", "cre"))
+Description: What the package does (one paragraph)
+Depends: R (>= 3.1.0)
+License: What license is it under?
+LazyData: true
+```
+
+
+#### Dependencies: What does your package need?
+
+It's the job of the `DESCRIPTION` to list the packages that your package needs to work. R has a rich set of ways of describing potential dependencies. For example, the following lines indicate that your package needs both ggvis and dplyr to work:
+
+```yaml
+Imports:
+    dplyr,
+    ggvis
+```
+
+Whereas, the lines below indicate that while your package can take advantage of ggvis and dplyr, they're not required to make it work:
+
+```yaml
+Suggests:
+    dplyr,
+    ggvis
+```
+
+Both `Imports` and `Suggests` take a comma separated list of package names. I recommend putting one package on each line, and keeping them in alphabetical order. That makes it easy to skim.
+
+`Imports` and `Suggests` differ in their strength of dependency:
+
+*   `Imports`: packages listed here _must_ be present for your package to 
+    work. In fact, any time your package is installed, those packages will, if 
+    not already present, be installed on your computer (`devtools::load_all()`
+    also checks that the packages are installed).
+    
+    Adding a package dependency here ensures that it'll be installed. However, 
+    it does _not_ mean that it will be attached along with your package (i.e., 
+    `library(x)`). The best practice is to explicitly refer to external 
+    functions using the syntax `package::function()`. This makes it very easy to 
+    identify which functions live outside of your package. This is especially 
+    useful when you read your code in the future.
+  
+    If you use a lot of functions from other packages this is rather
+    verbose. There's also a minor performance penalty associated with `::` 
+    (on the order of 5µs, so it will only matter if you call the function
+    millions of times). You'll learn about alternative ways to call functions
+    in other packages in [namespace imports](#imports).
+
+*   `Suggests`: your package can use these packages, but doesn't require them.
+    You might use suggested packages for example datasets, to run tests, 
+    build vignettes, or maybe there's only one function that needs the package.
+  
+    Packages listed in `Suggests` are not automatically installed along with
+    your package. This means that you need to check if the package is available 
+    before using it (use `requireNamespace(x, quietly = TRUE)`). There are
+    two basic scenarios:
+      
+    ```{r}
+    # You need the suggested package for this function    
+    my_fun <- function(a, b) {
+      if (!requireNamespace("pkg", quietly = TRUE)) {
+        stop("Package \"pkg\" needed for this function to work. Please install it.",
+          call. = FALSE)
+      }
+    }
+    
+    # There's a fallback method if the package isn't available
+    my_fun <- function(a, b) {
+      if (requireNamespace("pkg", quietly = TRUE)) {
+        pkg::f()
+      } else {
+        g()
+      }
+    }
+    ```
+
+When developing packages locally, you never need to use `Suggests`. When releasing your package, using `Suggests` is a courtesy to your users. It frees them from downloading rarely needed packages, and lets them get started with your package as quickly as possible.
+
+The easiest way to add `Imports` and `Suggests` to your package is to use `usethis::use_package()`. This automatically puts them in the right place in your `DESCRIPTION`, and reminds you how to use them.
+
+```{r, eval = FALSE}
+usethis::use_package("dplyr") # Defaults to imports
+#> Adding dplyr to Imports
+#> Refer to functions with dplyr::fun()
+usethis::use_package("dplyr", "Suggests")
+#> Adding dplyr to Suggests
+#> Use requireNamespace("dplyr", quietly = TRUE) to test if package is 
+#>  installed, then use dplyr::fun() to refer to functions.
+```
+
+### Versioning
+
+If you need a specific version of a package, specify it in parentheses after the package name:
+
+```yaml
+Imports:
+    ggvis (>= 0.2),
+    dplyr (>= 0.3.0.1)
+Suggests:
+    MASS (>= 7.3.0)
+```
+
+You almost always want to specify a minimum version rather than an exact version (`MASS (== 7.3.0)`). Since R can't have multiple versions of the same package loaded at the same time, specifying an exact dependency dramatically increases the chance of conflicting versions.
+
+Versioning is most important when you release your package. Usually people don't have exactly the same versions of packages installed that you do. If someone has an older package that doesn't have a function your package needs, they'll get an unhelpful error message. However, if you supply the version number, they'll get a error message that tells them exactly what the problem is: an out of date package. 
+
+Think carefully if you declare a minimum version. In some sense, the safest thing to do is to require a version greater than or equal to the package's current version. For public work, this is most naturally defined as the current CRAN version of a package; private or personal projects may adopt some other convention. But it's important to appreciate the implications for people who try to install your package: if their local installation doesn't fulfill all of your requirements around versions, installation will either fail or force upgrades of these dependencies. This is desirable if your minimum version requirements are genuine, i.e. your package would be broken otherwise. But if your stated requirements have a less solid rationale, this may be unnecessarily conservative and inconvenient.
+
+In the absence of clear, hard requirements, you should set minimum versions (or not) based on your expected user base, the package versions they are likely to have, and a cost-benefit analysis of being too lax versus too conservative.
+
+TODO: return here and insert concrete details closer to publication. Thing 1: mention relevant usethis function(s). Today that is `use_tidy_version()` but it needs some work (https://github.com/r-lib/usethis/issues/771). Thing 2: See if Kirill's prototype of studying minimum version has matured into anything we can recommend for general use (https://github.com/r-lib/pillar/tree/c017f20476fce431ceee18cc3a637f7ed2884d3a/minver#readme)
+
+### Other dependencies
+There are three other fields that allow you to express more specialised dependencies:
+
+  * `Depends`: Prior to the rollout of namespaces in R 2.14.0, `Depends` was 
+    the only way to "depend" on another package. Now, despite the name, you 
+    should almost always use `Imports`, not `Depends`. You'll learn why, and 
+    when you should still use `Depends`, in [namespaces](#namespace).
+    
+    You can also use `Depends` to require a specific version of R, e.g.
+    `Depends: R (>= 3.4.0)`. Again, think carefully if you do this. This raises
+    the same issues as setting a minimum version for a package you depend on,
+    except the stakes are much higher when it comes to R itself. Users can't simply
+    consent to the necessary upgrade, so, if other packages depend on yours,
+    your minimum version requirement for R can cause a cascade of package
+    installation failures.
+
+      - The [backports package](https://cran.r-project.org/package=backports)
+      is useful if you want to use a function like `trimws()`, which was
+      introduced in 3.3.0, while still supporting older R versions.
+      - The tidyverse packages officially support the current R version, the
+      devel version, and four previous versions. We proactively test this 
+      support in the standard build matrix we use for continuous integration.
+      - Packages with a lower level of use may not need this level of rigour.
+      The main takeaway is: if you state a minimum, you should have a reason and
+      you should take reasonable measures to test your claim regularly.      
+    
+  * `LinkingTo`: packages listed here rely on C or C++ code in another package. 
+    You'll learn more about `LinkingTo` in [compiled code](#src).
+    
+  * `Enhances`: packages listed here are "enhanced" by your package. Typically, 
+    this means you provide methods for classes defined in another package (a 
+    sort of reverse `Suggests`). But it's hard to define what that means, so I 
+    don't recommend using `Enhances`.
+    
+You can also list things that your package needs outside of R in the `SystemRequirements` field. But this is just a plain text field and is not automatically checked. Think of it as a quick reference; you'll also need to include detailed system requirements (and how to install them) in your README.
+
+## Title and description: What does your package do? {#pkg-description}
+
+The title and description fields describe what the package does. They differ only in length:
+
+* `Title` is a one line description of the package, and is often shown in 
+  package listing. It should be plain text (no markup), capitalised like a 
+  title, and NOT end in a period. Keep it short: listings will often 
+  truncate the title to 65 characters.
+
+* `Description` is more detailed than the title. You can use multiple sentences 
+  but you are limited to one paragraph. If your description spans multiple 
+  lines (and it should!), each line must be no more than 80 characters wide. 
+  Indent subsequent lines with 4 spaces.
+
+The `Title` and `Description` for ggplot2 are:
+
+```yaml
+Title: An implementation of the Grammar of Graphics
+Description: An implementation of the grammar of graphics in R. It combines 
+    the advantages of both base and lattice graphics: conditioning and shared 
+    axes are handled automatically, and you can still build up a plot step 
+    by step from multiple data sources. It also implements a sophisticated 
+    multidimensional conditioning system and a consistent interface to map
+    data to aesthetic attributes. See the ggplot2 website for more information, 
+    documentation and examples.
+```
+
+A good title and description are important, especially if you plan to release your package to CRAN.
+
+Because `Description` only gives you a small amount of space to describe what your package does, I also recommend including a `README.md` file that goes into much more depth and shows a few examples. You'll learn about that in [README.md](#readme).
+
+## Author: who are you? {#author}
+
+To identify the package's author, and whom to contact if something goes wrong, use the `Authors@R` field. This field is unusual because it contains executable R code rather than plain text. Here's an example:
+
+```yaml
+Authors@R: person("Hadley", "Wickham", email = "hadley@rstudio.com",
+  role = c("aut", "cre"))
+```
+
+```{r}
+person("Hadley", "Wickham", email = "hadley@rstudio.com", 
+  role = c("aut", "cre"))
+```
+
+This command says that both the author (aut) and the maintainer (cre) is Hadley Wickham, and that his email address is `hadley@rstudio.com`. The `person()` function has four main arguments:
+
+* The name, specified by the first two arguments, `given` and `family` (these
+  are normally supplied by position, not name). In English cultures, `given` 
+  (first name) comes before `family` (last name). In many cultures, this 
+  convention does not hold.
+  
+* The `email` address.
+
+* A three letter code specifying the `role`. There are four important roles:
+
+    * `cre`: the creator or maintainer, the person you should bother 
+      if you have problems.
+      
+    * `aut`: authors, those who have made significant contributions to the 
+      package.
+    
+    * `ctb`: contributors, those who have made smaller contributions, like 
+      patches.
+    
+    * `cph`: copyright holder. This is used if the copyright is held by someone 
+      other than the author, typically a company (i.e. the author's employer).
+    
+    (The [full list of roles](http://www.loc.gov/marc/relators/relaterm.html) is
+    extremely comprehensive. Should your package have a woodcutter ("wdc"), 
+    lyricist ("lyr") or costume designer ("cst"), rest comfortably that you can 
+    correctly describe their role in creating your package.)
+
+If you need to add further clarification, you can also use the `comment` argument and supply the desired information in plain text.
+
+You can list multiple authors with `c()`:
+
+```yaml
+Authors@R: c(
+    person("Hadley", "Wickham", email = "hadley@rstudio.com", role = "cre"),
+    person("Winston", "Chang", email = "winston@rstudio.com", role = "aut"))
+```
+
+Every package must have at least one author (aut) and one maintainer (cre) (they might be the same person). The creator must have an email address. These fields are used to generate the basic citation for the package (e.g. `citation("pkgname")`). Only people listed as authors will be included in the auto-generated citation. There are a few extra details if you're including code that other people have written. Since this typically occurs when you're wrapping a C library, it's discussed in [compiled code](#src).
+
+As well as your email address, it's also a good idea to list other resources available for help. You can list URLs in `URL`. Multiple URLs are separated with a comma. `BugReports` is the URL where bug reports should be submitted. For example, knitr has:
+
+```yaml
+URL: http://yihui.name/knitr/
+BugReports: https://github.com/yihui/knitr/issues
+```
+
+You can also use separate `Maintainer` and `Author` fields. I prefer not to use these fields because `Authors@R` offers richer metadata. 
+
+### On CRAN
+
+The most important thing to note is that your email address (i.e., the address of `cre`) is the address that CRAN will use to contact you about your package. So make sure you use an email address that's likely to be around for a while. Also, because this address will be used for automated mailings, CRAN policies require that this be for a single person (not a mailing list) and that it does not require any confirmation or use any filtering.
+
+## License: Who can use your package? {#license}
+
+The `License` field can be either a standard abbreviation for an open source license, like `GPL-2` or `BSD`, or a pointer to a file containing more information, `file LICENSE`. The license is really only important if you're planning on releasing your package. If you don't, you can ignore this section. If you want to make it clear that your package is not open source, use `License: file LICENSE` and then create a file called `LICENSE`, containing for example:
+
+    Proprietary 
+
+    Do not distribute outside of Widgets Incorporated.
+
+Open source software licensing is a rich and complex field. Fortunately, in my opinion, there are only three licenses that you should consider for your R package:
+
+  * [MIT](https://tldrlegal.com/license/mit-license) 
+    (v. similar: to BSD 2 and 3 clause licenses). This is a simple and
+    permissive license. It lets people use  and freely distribute your code
+    subject to only one restriction: the license must always be distributed
+    with the code.
+  
+    The MIT license is a "template", so if you use it, you need 
+    `License: MIT + file LICENSE`, and a `LICENSE` file that looks like this:
+    
+    ```yaml
+    YEAR: <Year or years when changes have been made>
+    COPYRIGHT HOLDER: <Name of the copyright holder>
+    ```
+
+  * [GPL-2](https://tldrlegal.com/license/gnu-general-public-license-v2) or 
+    [GPL-3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)). 
+    These are "copy-left" licenses. This means that anyone who distributes your
+    code in a bundle must license the whole bundle in a GPL-compatible way. 
+    Additionally, anyone who distributes modified versions of your code 
+    (derivative works) must also make the source code available. GPL-3 is a 
+    little stricter than GPL-2, closing some older loopholes.
+
+  * [CC0](https://tldrlegal.com/license/creative-commons-cc0-1.0-universal). 
+    It relinquishes all your rights on the code and data so that it can be 
+    freely used by anyone for any purpose. This is sometimes called putting it 
+    in the public domain, a term which is neither well-defined nor meaningful in 
+    all countries.
+  
+    This license is most appropriate for data packages. Data, at least in the US, 
+    is not copyrightable, so you're not really giving up much. This 
+    license just makes this point clear.
+  
+If you'd like to learn more about other common licenses, Github's [choosealicense.com](http://choosealicense.com/licenses/) is a good place to start. Another good resource is <https://tldrlegal.com/>, which explains the most important parts of each license. If you use a license other than the three I suggest, make sure you consult the "Writing R Extensions" section on [licensing][R-exts].
+
+If your package includes code that you didn't write, you need to make sure you're in compliance with its license. Since this occurs most commonly when you're including C source code, it's discussed in more detail in [compiled code](#src).
+
+### On CRAN
+
+If you want to release your package to CRAN, you must pick a standard license. Otherwise it's difficult for CRAN to determine whether or not it's legal to distribute your package! You can find a complete list of licenses that CRAN considers valid at <https://svn.r-project.org/R/trunk/share/licenses/license.db>.
+
+```{r, results='asis', echo = FALSE, eval = FALSE}
+licenses <- read.dcf(file.path(R.home("share"), "licenses", "license.db"))
+licenses <- as.data.frame(licenses, stringsAsFactors = FALSE)
+licenses <- licenses[order(licenses$Name, licenses$Version), ]
+licenses[is.na(licenses)] <- ""
+has_abbrev <- subset(licenses, Abbrev != "")
+knitr::kable(has_abbrev[c("Name", "Version", "Abbrev")], row.names = FALSE)
+```
+
+## Version {#version}
+
+Formally, an R package version is a sequence of at least two integers separated by either `.` or `-`. For example, `1.0` and `0.9.1-10` are valid versions, but `1` or `1.0-devel` are not. You can parse a version number with `numeric_version`.
+
+```{r}
+numeric_version("1.9") == numeric_version("1.9.0")
+numeric_version("1.9.0") < numeric_version("1.10.0")
+```
+
+For example, a package might have a version 1.9. This version number is considered by R to be the same as 1.9.0, less than version 1.9.2, and all of these are less than version 1.10 (which is version "one point ten", not "one point one zero"). R uses version numbers to determine whether package dependencies are satisfied. A package might, for example, import package `devtools (>= 1.9.2)`, in which case version 1.9 or 1.9.0 wouldn't work.
+
+The version number of your package increases with subsequent releases of a package, but it's more than just an incrementing counter -- the way the number changes with each release can convey information about what kind of changes are in the package.
+
+I don't recommend taking full advantage of R's flexibility. Instead always use `.` to separate version numbers. 
+
+* A released version number consists of three numbers, `<major>.<minor>.<patch>`. 
+  For version number 1.9.2, 1 is the major number, 9 is the minor number, and 
+  2 is the patch number. Never use versions like `1.0`, instead always spell
+  out the three components, `1.0.0.`
+
+* An in-development package has a fourth component: the development version.
+  This should start at 9000. For example, the first version of the package
+  should be `0.0.0.9000`. There are two reasons for this recommendation:
+  first, it makes it easy to see if a package is released or in-development,
+  and the use of the fourth place means that you're not limited to what the
+  next version will be. `0.0.1`, `0.1.0` and `1.0.0` are all greater than 
+  `0.0.0.9000`.
+  
+    Increment the development version, e.g. from `9000` to `9001` if you've
+    added an important feature that another development package needs to depend 
+    on.
+    
+    If you're using svn, instead of using the arbitrary `9000`, you can
+    embed the sequential revision identifier.
+
+This advice here is inspired in part by [Semantic Versioning](http://semver.org) and by the [X.Org](http://www.x.org/releases/X11R7.7/doc/xorg-docs/Versions.html) versioning schemes. Read them if you'd like to understand more about the standards of versioning used by many open source projects.
+
+We'll come back to version numbers in the context of releasing your package, [picking a version number](#release-version). For now, just remember that the first version of your package should be `0.0.0.9000`.
+
+## Other components {#description-misc}
+
+A number of other fields are described elsewhere in the book:
+
+* `Collate` controls the order in which R files are sourced. This only
+  matters if your code has side-effects; most commonly because you're
+  using S4. This is described in more depth in [documenting S4](#man-s4).
+
+* `LazyData` makes it easier to access data in your package. Because it's so 
+  important, it's included in the minimal description created by devtools. It's
+  described in more detail in [external data](#data).
+
+There are actually many other rarely, if ever, used fields. A complete list can be found in the "The DESCRIPTION file" section of the [R extensions manual][R-exts]. You can also create your own fields to add additional metadata. The only restrictions are that you shouldn't use existing names and that, if you plan to submit to CRAN, the names you use should be valid English words (so a spell-checking NOTE won't be generated).
+
+# Object documentation {#man}
+
+Documentation is one of the most important aspects of a good package. Without it, users won't know how to use your package. Documentation is also useful for future-you (so you remember what your functions were supposed to do), and for developers extending your package. 
+
+There are multiple forms of documentation. In this chapter, you'll learn about object documentation, as accessed by `?` or `help()`. Object documentation is a type of reference documentation. It works like a dictionary: while a dictionary is helpful if you want to know what a word means, it won't help you find the right word for a new situation. Similarly, object documentation is helpful if you already know the name of the object, but it doesn't help you find the object you need to solve a given problem. That's one of the jobs of vignettes, which you'll learn about in the next chapter.
+
+R provides a standard way of documenting the objects in a package: you write `.Rd` files in the `man/` directory. These files use a custom syntax, loosely based on LaTeX, and are rendered to HTML, plain text and pdf for viewing. Instead of writing these files by hand, we're going to use roxygen2 which turns specially formatted comments into `.Rd` files. The goal of roxygen2 is to make documenting your code as easy as possible. It has a number of advantages over writing `.Rd` files by hand:
+
+* Code and documentation are intermingled so that when you modify your code, 
+  you're reminded to also update your documentation.
+
+* Roxygen2 dynamically inspects the objects that it documents, so you 
+  can skip some boilerplate that you'd otherwise need to write by hand.
+
+* It abstracts over the differences in documenting different types of objects,
+  so you need to learn fewer details.
+
+As well as generating `.Rd` files, roxygen2 can also manage your `NAMESPACE` and the `Collate` field in `DESCRIPTION`. This chapter discusses `.Rd` files and the collate field. [NAMESPACE](#namespace) describes how you can use roxygen2 to manage your `NAMESPACE`, and why you should care.
+
+## The documentation workflow {#man-workflow}
+
+In this section, we'll first go over a rough outline of the complete documentation workflow. Then, we'll dive into each step individually. There are four basic steps:
+
+1. Add roxygen comments to your `.R` files.
+
+1. Run `devtools::document()` (or press Ctrl/Cmd + Shift + D in RStudio) to 
+   convert roxygen comments to `.Rd` files. (`devtools::document()` calls 
+   `roxygen2::roxygenise()` to do the hard work.)
+
+1. Preview documentation with `?`.
+
+1. Rinse and repeat until the documentation looks the way you want.
+
+The process starts when you add roxygen comments to your source file: roxygen comments start with `#'` to distinguish them from regular comments. Here's documentation for a simple function:
+
+```{r}
+#' Add together two numbers.
+#' 
+#' @param x A number.
+#' @param y A number.
+#' @return The sum of \code{x} and \code{y}.
+#' @examples
+#' add(1, 1)
+#' add(10, 1)
+add <- function(x, y) {
+  x + y
+}
+```
+
+Pressing Ctrl/Cmd + Shift + D (or running `devtools::document()`) will generate a `man/add.Rd` that looks like:
+
+```
+% Generated by roxygen2 (4.0.0): do not edit by hand
+\name{add}
+\alias{add}
+\title{Add together two numbers}
+\usage{
+add(x, y)
+}
+\arguments{
+  \item{x}{A number}
+  \item{y}{A number}
+}
+\value{
+The sum of \code{x} and \code{y}
+}
+\description{
+Add together two numbers
+}
+\examples{
+add(1, 1)
+add(10, 1)
+}
+```
+
+If you're familiar with LaTeX, this should look familiar since the `.Rd` format is loosely based on it. You can read more about the Rd format in the [R extensions](http://cran.r-project.org/doc/manuals/R-exts.html#Rd-format) manual. Note the comment at the top of the file: it was generated by code and shouldn't be modified. Indeed, if you use roxygen2, you'll rarely need to look at these files.
+
+When you use `?add`, `help("add")`, or `example("add")`, R looks for an `.Rd` file containing `\alias{"add"}`. It then parses the file, converts it into HTML and displays it. Here's what the result looks like in RStudio:
+
+```{r, echo = FALSE}
+# knitr::include_graphics("build-reload-opts-2.png")
+```
+
+(Note you can preview development documentation because devtools overrides the usual help functions to teach them how to work with source packages. If the documentation doesn't appear, make sure that you're using devtools and that you've loaded the package with `devtools::load_all()`.)
+
+## Alternative documentation workflow {#man-workflow-2}
+
+The first documentation workflow is very fast, but it has one limitation: the preview documentation pages will not show any links between pages. If you'd like to also see links, use this workflow:
+
+
+1. Add roxygen comments to your `.R` files.
+
+1. Click `build-reload`
+   in the build pane or press Ctrl/Cmd + Shift + B. This completely rebuilds the 
+   package, including updating all the documentation, installs it in your
+   regular library, then restarts R and reloads your package. This is 
+   slow but thorough.
+
+1. Preview documentation with `?`.
+
+1. Rinse and repeat until the documentation looks the way you want.
+
+If this workflow doesn't seem to be working, check your project options in RStudio. Old versions of devtools and RStudio did not automatically update the documentation when the package was rebuilt:
+
+```{r, echo = FALSE}
+# knitr::include_graphics("build-reload-opts-2.png")
+```
+
+## Roxygen comments {#roxygen-comments}
+
+Roxygen comments start with `#'` and come before a function. All the roxygen lines preceding a function are called a __block__. Each line should be wrapped in the same way as your code, normally at 80 characters.
+
+Blocks are broken up into __tags__, which look like `@tagName details`. The content of a tag extends from the end of the tag name to the start of the next tag (or the end of the block). Because `@` has a special meaning in roxygen, you need to write `@@` if you want to add a literal `@` to the documentation (this is mostly important for email addresses and for accessing slots of S4 objects).
+
+Each block includes some text before the first tag.[^1] This is called the __introduction__, and is parsed specially:
+
+* The first _sentence_ becomes the title of the documentation. That's what you 
+  see when you look at `help(package = mypackage)` and is shown at the top of 
+  each help file. It should fit on one line, be written in sentence case, but not 
+  end in a full stop.
+  
+* The second _paragraph_ is the description: this comes first in the 
+  documentation and should briefly describe what the function does. 
+  
+* The third and subsequent _paragraphs_ go into the details: this is a 
+  (often long) section that is shown after the argument description and should 
+  go into detail about how the function works.
+
+All objects must have a title and description. Details are optional.
+
+Here's an example showing what the introduction for `sum()` might look like if it had been written with roxygen:
+
+```{r}
+#' Sum of vector elements.
+#' 
+#' \code{sum} returns the sum of all the values present in its arguments.
+#' 
+#' This is a generic function: methods can be defined for it directly or via the
+#' \code{\link{Summary}} group generic. For this to work properly, the arguments
+#' \code{...} should be unnamed, and dispatch is on the first argument.
+sum <- function(..., na.rm = TRUE) {}
+```
+
+`\code{}` and `\link{}` are formatting commands that you'll learn about in [formatting](#text-formatting). I've been careful to wrap the roxygen block so that it's less than 80 characters wide. You can do that automatically in Rstudio with Ctrl/Cmd + Shift + / (or from the menu, code | re-flow comment).
+
+You can add arbitrary sections to the documentation with the `@section` tag. This is a useful way of breaking a long details section into multiple chunks with useful headings. Section titles should be in sentence case, must be followed by a colon, and they can only be one line long.
+
+```{r}
+#' @section Warning:
+#' Do not operate heavy machinery within 8 hours of using this function.
+```
+
+There are two tags that make it easier for people to navigate between help files:
+
+* `@seealso` allows you to point to other useful resources, either on the web, 
+  `\url{http://www.r-project.org}`, in your package `\code{\link{functioname}}`,
+  or another package `\code{\link[packagename]{functioname}}`. 
+   
+* If you have a family of related functions where every function should link
+  to every other function in the family, use `@family`. The value of `@family` 
+  should be plural.
+
+For sum, these components might look like:
+
+```{r}
+#' @family aggregate functions
+#' @seealso \code{\link{prod}} for products, \code{\link{cumsum}} for cumulative
+#'   sums, and \code{\link{colSums}}/\code{\link{rowSums}} marginal sums over
+#'   high-dimensional arrays.
+```
+
+Two other tags make it easier for the user to find documentation:
+
+*   `@aliases alias1 alias2 ...` adds additional aliases to the topic.
+    An alias is another name for the topic that can be used with `?`.
+
+*   `@keywords keyword1 keyword2 ...` adds standardised keywords. Keywords are
+    optional, but if present, must be taken from a predefined list found in 
+    `file.path(R.home("doc"), "KEYWORDS")`. 
+  
+    Generally, keywords are not that useful except for `@keywords internal`. 
+    Using the internal keyword removes the function from the package 
+    index and disables some of its automated tests. It's common to use
+    `@keywords internal` for functions that are of interest to other
+    developers extending your package, but not most users.
+
+Other tags are situational: they vary based on the type of object that you're documenting. The following sections describe the most commonly used tags for functions, packages and the various methods, generics and objects used by R's three OO systems. 
+
+## Documenting functions {#man-functions}
+
+Functions are the most commonly documented object. As well as the introduction block, most functions have three tags: `@param`, `@examples` and `@return`.
+
+*   `@param name description` describes the function's inputs or parameters.
+    The description should provide a succinct summary of the type of the
+    parameter (e.g., string, numeric vector) and, if not obvious from
+    the name, what the parameter does. 
+    
+    The description should start with a capital letter and end with a full stop. 
+    It can span multiple lines (or even paragraphs) if necessary. All 
+    parameters must be documented.
+
+    You can document multiple arguments in one place by separating
+    the names with commas (no spaces). For example, to document both
+    `x` and `y`, you can write `@param x,y Numeric vectors.`.
+
+*   `@examples` provides executable R code showing how to use the function in
+    practice. This is a very important part of the documentation because
+    many people look at the examples first. Example code must work without 
+    errors as it is run automatically as part of `R CMD check`.
+
+    For the purpose of illustration, it's often useful to include code
+    that causes an error. `\dontrun{}` allows you to include code in the
+    example that is not run. (You used to be able to use `\donttest{}` for
+    a similar purpose, but it's no longer recommended because it actually
+    __is__ tested.)
+
+    Instead of including examples directly in the documentation, you can
+    put them in separate files and use `@example path/relative/to/package/root`
+    to insert them into the documentation. (Note that the `@example` tag here has no 's'.)
+
+*   `@return description` describes the output from the function. This is
+    not always necessary, but is a good idea if your function returns different 
+    types of output depending on the input, or if you're returning an S3, S4 or 
+    RC object.
+
+We could use these new tags to improve our documentation of `sum()` as follows:
+
+```{r}
+#' Sum of vector elements.
+#'
+#' \code{sum} returns the sum of all the values present in its arguments.
+#'
+#' This is a generic function: methods can be defined for it directly
+#' or via the \code{\link{Summary}} group generic. For this to work properly,
+#' the arguments \code{...} should be unnamed, and dispatch is on the
+#' first argument.
+#'
+#' @param ... Numeric, complex, or logical vectors.
+#' @param na.rm A logical scalar. Should missing values (including NaN)
+#'   be removed?
+#' @return If all inputs are integer and logical, then the output
+#'   will be an integer. If integer overflow
+#'   \url{http://en.wikipedia.org/wiki/Integer_overflow} occurs, the output
+#'   will be NA with a warning. Otherwise it will be a length-one numeric or
+#'   complex vector.
+#'
+#'   Zero-length vectors have sum 0 by definition. See
+#'   \url{http://en.wikipedia.org/wiki/Empty_sum} for more details.
+#' @examples
+#' sum(1:10)
+#' sum(1:5, 6:10)
+#' sum(F, F, F, T, T)
+#'
+#' sum(.Machine$integer.max, 1L)
+#' sum(.Machine$integer.max, 1)
+#'
+#' \dontrun{
+#' sum("a")
+#' }
+sum <- function(..., na.rm = TRUE) {}
+```
+
+Indent the second and subsequent lines of a tag so that when scanning the documentation it's easy to see where one tag ends and the next begins. Tags that always span multiple lines (like `@example`) should start on a new line and don't need to be indented.
+
+## Documenting datasets {#man-data}
+
+See [documenting data](#documenting-data).
+
+## Documenting packages {#man-packages}
+
+You can use roxygen to provide a help page for your package as a whole. This is accessed with `package?foo`, and can be used to describe the most important components of your package. It's a useful supplement to vignettes, as described in the next chapter. 
+
+There's no object that corresponds to a package, so you need to document `NULL`, and then manually label it with `@docType package` and `@name <package-name>`. This is also an excellent place to use the `@section` tag to divide up page into useful categories.
+
+```{r}
+#' foo: A package for computating the notorious bar statistic.
+#'
+#' The foo package provides three categories of important functions:
+#' foo, bar and baz.
+#' 
+#' @section Foo functions:
+#' The foo functions ...
+#'
+#' @docType package
+#' @name foo
+NULL
+```
+
+I usually put this documentation in a file called `<package-name>.R`. It's also a good place to put the package level import statements that you'll learn about in [imports](#imports).
+
+## Documenting classes, generics and methods {#man-classes}
+
+It's relatively straightforward to document classes, generics and methods. The details vary based on the object system you're using. The following sections give the details for the S3, S4 and RC object systems.
+
+### S3 {#man-s3}
+
+S3 __generics__ are regular functions, so document them as such. S3 __classes__ have no formal definition, so document the constructor function. It is your choice whether or not to document S3 __methods__. You don't need to document methods for simple generics like `print()`. But if your method is more complicated or includes additional arguments, you should document it so people know how it works. In base R, you can see examples of documentation for more complex methods like `predict.lm()`, `predict.glm()`, and `anova.glm()`.
+
+Older versions of roxygen required explicit `@method generic class` tags for all S3 methods. From version 3.0.0 onward, this is no longer needed as roxygen2 will figure it out automatically. If you are upgrading, make sure to remove these old tags. Automatic method detection will only fail if the generic and class are ambiguous. For example, is `all.equal.data.frame()` the `equal.data.frame` method for `all`, or the `data.frame` method for `all.equal`? If this happens, you can disambiguate with e.g. `@method all.equal data.frame`.
+
+### S4 {#man-s4}
+
+Document __S4 classes__ by adding a roxygen block before `setClass()`. Use `@slot` to document the slots of the class in the same way you use `@param` to describe the parameters of a function. Here's a simple example:
+
+```{r}
+#' An S4 class to represent a bank account.
+#'
+#' @slot balance A length-one numeric vector
+Account <- setClass("Account",
+  slots = list(balance = "numeric")
+)
+```
+
+S4 __generics__ are also functions, so document them as such. S4 __methods__ are a little more complicated, however. Unlike S3, all S4 methods must be documented. You document them like a regular function, but you probably don't want each method to have its own documentation page. Instead, put the method documentation in one of three places:
+
+* In the class. Most appropriate if the corresponding generic uses single
+  dispatch and you created the class.
+
+* In the generic. Most appropriate if the generic uses multiple dispatch
+  and you have written both the generic and the method.
+
+* In its own file. Most appropriate if the method is complex, or if
+  you've written the method but not the class or generic.
+
+Use either `@rdname` or `@describeIn` to control where method documentation goes. See [documenting multiple objects in one file](#multiple-man) for details.
+
+Another consideration is that S4 code often needs to run in a certain order. For example, to define the method `setMethod("foo", c("bar", "baz"), ...)` you must already have created the `foo` generic and the two classes. By default, R code is loaded in alphabetical order, but that won't always work for your situation. Rather than relying on alphabetic ordering, roxygen2 provides an explicit way of saying that one file must be loaded before another: `@include`. The `@include` tag gives a space separated list of file names that should be loaded before the current file:
+
+```{r, eval = FALSE}
+#' @include class-a.R
+setClass("B", contains = "A")
+```
+
+Often, it's easiest to put this at the top of the file. To make it clear that this tag applies to the whole file, and not a specific object, document `NULL`.
+
+```{r, eval = FALSE}
+#' @include foo.R bar.R baz.R
+NULL
+setMethod("foo", c("bar", "baz"), ...)
+```
+
+Roxygen uses the `@include` tags to compute a topological sort which ensures that dependencies are loaded before they're needed. It then sets the `Collate` field in `DESCRIPTION`, which overrides the default alphabetic ordering. A simpler alternative to `@include` is to define all classes and methods in `aaa-classes.R` and `aaa-generics.R`, and rely on these coming first since they're in alphabetical order. The main disadvantage is that you can't organise components into files as naturally as you might want.
+
+Older versions of roxygen2 required explicit `@usage`, `@alias` and `@docType` tags for document S4 objects. However, as of version 3.0.0, roxygen2 generates the correct values automatically so you no longer need to use them. If you're upgrading from an old version, you can delete these tags.
+
+### RC {#man-rc}
+
+Reference classes are different to S3 and S4 because methods are associated with classes, not generics. RC also has a special convention for documenting methods: the __docstring__. The docstring is a string placed inside the definition of the method which briefly describes what it does. This makes documenting RC simpler than S4 because you only need one roxygen block per class.
+
+```{r}
+#' A Reference Class to represent a bank account.
+#'
+#' @field balance A length-one numeric vector.
+Account <- setRefClass("Account",
+  fields = list(balance = "numeric"),
+  methods = list(
+    withdraw = function(x) {
+      "Withdraw money from account. Allows overdrafts"
+      balance <<- balance - x
+    }
+  )
+)
+```
+
+Methods with doc strings will be included in the "Methods" section of the class documentation. Each documented method will be listed with an automatically generated usage statement and its doc string. Also note the use of `@field` instead of `@slot`.
+
+## Special characters {#man-special}
+
+There are three special characters that need special handling if you want them to appear in the final documentation:
+
+* `@`, which usually marks the start of a roxygen tag. Use `@@` to insert a
+  literal `@` in the final documentation.
+  
+* `%`, which usually marks the start of a latex comment which continues to the
+  end of the line. Use `\%` to insert a literal `%` in the output document. 
+  The escape is not needed in examples.
+  
+* `\`, which usually marks the start of a latex escaping. Use `\\` to 
+  insert a literal `\` in the documentation.
+
+## Do repeat yourself {#dry2}
+
+There is a tension between the DRY (don't repeat yourself) principle of programming and the need for documentation to be self-contained. It's frustrating to have to navigate through multiple help files in order to pull together all the pieces you need. Roxygen2 provides two ways to avoid repetition in the source, while still assembling everything into one documentation file:
+
+* The ability to reuse parameter documentation with `@inheritParams`.
+
+* The ability to document multiple functions in the same place with 
+  `@describeIn` or `@rdname`
+
+### Inheriting parameters from other functions
+
+You can inherit parameter descriptions from other functions using `@inheritParams source_function`. This tag will bring in all documentation for parameters that are undocumented in the current function, but documented in the source function. The source can be a function in the current package, via `@inheritParams function`, or another package, via `@inheritParams package::function`. For example the following documentation:
+
+```{r}
+#' @param a This is the first argument
+foo <- function(a) a + 10
+#' @param b This is the second argument
+#' @inheritParams foo
+bar <- function(a, b) {
+  foo(a) * 10
+}
+```
+
+is equivalent to
+
+```{r}
+#' @param a This is the first argument
+#' @param b This is the second argument
+bar <- function(a, b) {
+  foo(a) * 10
+}
+```
+
+Note that inheritance works recursively, so you can inherit documentation from a function that has inherited it from elsewhere.
+
+### Documenting multiple functions in the same file {#multiple-man}
+
+You can document multiple functions in the same file by using either `@rdname` or `@describeIn`. However, it's a technique best used with caution: documenting too many functions in one place leads to confusing documentation. You should use it when functions have very similar arguments, or have complementary effects (e.g., `open()` and `close()` methods).
+
+`@describeIn` is designed for the most common cases:
+
+* Documenting methods in a generic.
+* Documenting methods in a class.
+* Documenting functions with the same (or similar) arguments.
+
+It generates a new section, named either "Methods (by class)", "Methods (by generic)" or "Functions". The section contains a bulleted list describing each function. They're labelled so that you know what function or method it's talking about. Here's an example, documenting an imaginary new generic:
+
+```{r}
+#' Foo bar generic
+#'
+#' @param x Object to foo.
+foobar <- function(x) UseMethod("foobar")
+#' @describeIn foobar Difference between the mean and the median
+foobar.numeric <- function(x) abs(mean(x) - median(x))
+#' @describeIn foobar First and last values pasted together in a string.
+foobar.character <- function(x) paste0(x[1], "-", x[length(x)])
+```
+
+An alternative to `@describeIn` is `@rdname`. It overrides the default file name generated by roxygen and merges documentation for multiple objects into one file. This gives you the complete freedom to combine documentation as you see fit. 
+
+There are two ways to use `@rdname`. You can add documentation to an existing function:
+
+```{r}
+#' Basic arithmetic
+#'
+#' @param x,y numeric vectors.
+add <- function(x, y) x + y
+#' @rdname add
+times <- function(x, y) x * y
+```
+
+Or, you can create a dummy documentation file by documenting `NULL` and setting an informative `@name`.
+
+```{r}
+#' Basic arithmetic
+#'
+#' @param x,y numeric vectors.
+#' @name arith
+NULL
+#' @rdname arith
+add <- function(x, y) x + y
+#' @rdname arith
+times <- function(x, y) x * y
+```
+
+## Text formatting reference sheet {#text-formatting}
+
+Within roxygen tags, you use `.Rd` syntax to format text. This vignette shows you examples of the most important commands. The full details are described in [R extensions](http://cran.r-project.org/doc/manuals/R-exts.html#Marking-text).
+
+Note that `\` and `%` are special characters in the Rd format. To insert a literal `%` or `\`, escape them with a backslash `\\`, `\%`.
+
+### Character formatting
+
+* `\emph{italics}`: _italics_.
+
+* `\strong{bold}`: __bold__.
+
+* `\code{r_function_call(with = "arguments")}`: 
+  `r_function_call(with = "arguments")` (format inline code)
+
+* `\preformatted{}`: format text as-is, can be used for multi-line code
+
+### Links
+
+To other documentation:
+
+* `\code{\link{function}}`: function in this package.
+
+* `\code{\link[MASS]{abbey}}`: function in another package.
+
+* `\link[=dest]{name}`: link to dest, but show name.
+
+* `\code{\link[MASS:abbey]{name}}`: link to function in another package, but show name.
+
+* `\linkS4class{abc}`: link to an S4 class.
+
+To the web:
+
+* `\url{http://rstudio.com}`: a url.
+
+* `\href{http://rstudio.com}{Rstudio}`:, a url with custom link text.
+
+* `\email{hadley@@rstudio.com}` (note the doubled `@`): an email address.
+
+### Lists
+
+* Ordered (numbered) lists:
+
+    ```{r}
+    #' \enumerate{
+    #'   \item First item
+    #'   \item Second item
+    #' }
+    ```
+
+* Unordered (bulleted) lists:
+
+    ```{r}
+    #' \itemize{
+    #'   \item First item
+    #'   \item Second item
+    #' }
+    ```
+
+* Definition (named) lists:
+
+    ```{r}
+    #' \describe{
+    #'   \item{One}{First item}
+    #'   \item{Two}{Second item}
+    #' }
+    ```
+
+### Mathematics
+
+You can use standard LaTeX math (with no extensions). Choose between either inline or block display:
+
+* `\eqn{a + b}`: inline equation.
+
+* `\deqn{a + b}`: display (block) equation.
+
+### Tables
+
+Tables are created with `\tabular{}`. It has two arguments:
+
+1. Column alignment, specified by letter for each column (`l` = left, `r` = right,
+   `c` = centre.)
+
+2. Table contents, with columns separated by `\tab` and rows by `\cr`.
+
+The following function turns an R data frame into the correct format. It ignores column and row names, but should get you started.
+
+```{r}
+tabular <- function(df, ...) {
+  stopifnot(is.data.frame(df))
+  align <- function(x) if (is.numeric(x)) "r" else "l"
+  col_align <- vapply(df, align, character(1))
+  cols <- lapply(df, format, ...)
+  contents <- do.call("paste",
+    c(cols, list(sep = " \\tab ", collapse = "\\cr\n  ")))
+  paste("\\tabular{", paste(col_align, collapse = ""), "}{\n  ",
+    contents, "\n}\n", sep = "")
+}
+cat(tabular(mtcars[1:5, 1:5]))
+```
+
+

@@ -1,0 +1,279 @@
+---
+title: 'STAT 2604: Lecture 3'
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Graphics
+```{r,echo=TRUE}
+library("ggplot2")
+library("gcookbook")
+png("./mpg_wt.png")
+plot(mtcars$wt, mtcars$mpg,xlab = "WT",ylab = "MPG",main = "MPG versus WT",col="blue")# scatter plot
+dev.off()
+
+```
+
+## Enhanced scatter plots
+```{r,echo=TRUE,fig.height=5, fig.width=10,message=FALSE}
+library(car)
+scatterplot(mpg ~ wt | cyl, data=mtcars,
+   xlab="Weight of Car", ylab="Miles Per Gallon",
+   main="Enhanced Scatter Plot")
+```
+
+
+## More scatter plots
+
+```{r,echo=TRUE,eval=FALSE,fig.height=5, fig.width=10,message=FALSE}
+pairs(~mpg+disp+drat+wt,data=mtcars,main="Simple Scatterplot Matrix")
+# Scatterplot Matrices from the lattice Package
+library(lattice)
+# Scatterplot Matrices from the car Package
+library(car)
+scatterplotMatrix(~mpg+disp+drat+wt|cyl, data=mtcars,
+   main="Three Cylinder Options")
+# Scatterplot Matrices from the glus Package
+library(gclus)
+dta <- mtcars[c(1,3,5,6)] # get data
+dta.r <- abs(cor(dta)) # get correlations
+dta.col <- dmat.color(dta.r) # get colors
+dta.o <- order.single(dta.r)
+cpairs(dta, dta.o, panel.colors=dta.col, gap=.5,
+main="Variables Ordered and Colored by Correlation" )
+```
+
+
+## More scatter plots
+```{r,echo=TRUE,eval=FALSE,fig.height=5, fig.width=10,message=FALSE}
+# High Density Scatterplot with Binning
+library(hexbin)
+x <- rnorm(1000)
+hist(x)
+y <- rnorm(1000)
+bin<-hexbin(x, y, xbins=50)
+plot(bin, main="Hexagonal Binning")
+# High Density Scatterplot with Color Transparency
+pdf("scatterplot.pdf")
+x <- rnorm(1000)
+y <- rnorm(1000)
+plot(x,y, main="PDF Scatterplot Example", col=rgb(0,100,0,50,maxColorValue=255), pch=16)
+dev.off()
+# 3D Scatterplot
+library(scatterplot3d)
+attach(mtcars)
+scatterplot3d(wt,disp,mpg, main="3D Scatterplot")
+```
+
+
+## 3D scatter plots
+```{r,echo=TRUE,eval=FALSE,fig.height=5, fig.width=10,message=FALSE}
+# 3D Scatterplot
+library(scatterplot3d)
+attach(mtcars)
+scatterplot3d(wt,disp,mpg, main="3D Scatterplot")
+# 3D Scatterplot with Coloring and Vertical Drop Lines
+library(scatterplot3d)
+attach(mtcars)
+scatterplot3d(wt,disp,mpg, pch=16, highlight.3d=TRUE,
+  type="h", main="3D Scatterplot")
+# 3D Scatterplot with Coloring and Regression Plane
+library(scatterplot3d)
+attach(mtcars)
+s3d <-scatterplot3d(wt,disp,mpg, pch=16, highlight.3d=TRUE,
+  type="h", main="3D Scatterplot")
+fit <- lm(mpg ~ wt+disp)
+s3d$plane3d(fit)
+```
+
+
+## More 3D scatter plots
+```{r,echo=TRUE,eval=FALSE,fig.height=5, fig.width=10,message=FALSE}
+# Spinning 3d Scatterplot
+library(rgl)
+plot3d(wt, disp, mpg, col="red", size=3)
+# Another Spinning 3d Scatterplot
+library(Rcmdr)
+attach(mtcars)
+scatter3d(wt, disp, mpg)
+```
+
+
+## Multiple plots per figure
+```{r,echo=TRUE,fig.height=5, fig.width=10}
+## Boxplot and Histgram in one figure 
+x = rnorm(1000)
+## one row, two columns 
+par(mfrow=c(1,2))
+hist(x)
+boxplot(x)
+```
+
+
+
+
+## Using ggplot2
+```{r,echo=TRUE,fig.height=5, fig.width=10}
+library(ggplot2)
+qplot(mtcars$wt, mtcars$mpg)
+```
+
+
+## Line plot
+
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+plot(pressure$temperature, pressure$pressure, type="l")
+plot(pressure$temperature, pressure$pressure, type="l")
+points(pressure$temperature, pressure$pressure)
+lines(pressure$temperature, pressure$pressure/2, col="red")
+points(pressure$temperature, pressure$pressure/2, col="red")
+```
+
+## Bar Plot
+
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+barplot(table(mtcars$cyl))
+```
+
+##  Histogram
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+hist(mtcars$mpg, breaks=10)
+```
+
+##  Boxplot
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+boxplot(len ~ supp, data = ToothGrowth)
+```
+
+
+##  Function plot
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+curve(x^3 - 5*x, from=-4, to=4)
+```
+
+
+##  Function plot
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+myfun <- function(xvar) {
+ 1/(1 + exp(-xvar + 10))
+}
+curve(myfun(x), from=0, to=20)
+curve(1-myfun(x), add = TRUE, col = "red")
+```
+
+## Bar Graph
+```{r, echo = TRUE}
+library(gcookbook) # For the data set
+ggplot(pg_mean, aes(x=group, y=weight)) + geom_bar(stat="identity") #values
+```
+
+## Factor a continuous variable 
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+ggplot(BOD, aes(x=factor(Time), y=demand)) + geom_bar(stat="identity")
+```
+
+## Colored  bar
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+ggplot(pg_mean, aes(x=group, y=weight)) +
+geom_bar(stat="identity", fill="lightblue", colour="black")
+```
+
+## Grouping bars
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+ggplot(cabbage_exp, aes(x=Date, y=Weight, fill=Cultivar)) +
+  geom_bar(stat="identity",position="dodge")
+```
+
+##  Bar graph of counts
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+ggplot(diamonds, aes(x=cut)) + geom_bar()
+```
+
+
+##  Color positive and negative numbers
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+library(gcookbook) # For the data set
+csub <- subset(climate, Source=="Berkeley" & Year >= 1900)
+csub$pos <- csub$Anomaly10y >= 0
+csub
+```
+
+##  Color positive and negative numbers
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+ggplot(csub, aes(x=Year, y=Anomaly10y, fill=pos)) +
+geom_bar(stat="identity", position="identity")
+```
+
+##  Bar width
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+ggplot(pg_mean, aes(x=group, y=weight)) + geom_bar(stat="identity", width=0.5)
+```
+
+
+##  Stacked bar
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+library(gcookbook) # For the data set
+ggplot(cabbage_exp, aes(x=Date, y=Weight, fill=Cultivar)) +
+geom_bar(stat="identity")
+```
+
+## Line graph
+```{r, echo = TRUE,fig.height=5, fig.width=10}
+library(plyr)
+tg <- ddply(ToothGrowth, c("supp", "dose"), summarise, length=mean(len))
+ggplot(tg, aes(x=dose, y=length, colour=supp)) + geom_line()
+ggplot(tg, aes(x=dose, y=length, linetype=supp)) + geom_line()
+```
+
+## Static plot 
+```{r, eval=F, echo = TRUE,fig.height=5, fig.width=10}
+library(ggplot2)
+library(gganimate)
+theme_set(theme_bw())
+library(gapminder)
+p <- ggplot(
+  gapminder, 
+  aes(x = gdpPercap, y=lifeExp, size = pop, colour = country)
+  ) +
+  geom_point(show.legend = FALSE, alpha = 0.7) +
+  scale_color_viridis_d() +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  labs(x = "GDP per capita", y = "Life expectancy")
+p
+```
+
+## Basic Animation
+```{r, eval=F, echo = TRUE,fig.height=5, fig.width=10}
+p + transition_time(year) +
+  labs(title = "Year: {frame_time}")
+```
+
+
+## Create facets by continent
+```{r, eval =F, echo = TRUE,fig.height=5, fig.width=10}
+p + facet_wrap(~continent) +
+  transition_time(year) +
+  labs(title = "Year: {frame_time}")
+```
+
+
+## Let the view follow the data 
+```{r, eval =F, echo = TRUE,fig.height=5, fig.width=10}
+p + transition_time(year) +
+  labs(title = "Year: {frame_time}") +
+  view_follow(fixed_y = TRUE)
+```
+
+## Original data as background marks
+```{r, eval =F, echo = TRUE,fig.height=5, fig.width=10}
+p + transition_time(year) +
+  labs(title = "Year: {frame_time}") +
+  shadow_mark(alpha = 0.3, size = 0.5)
+```

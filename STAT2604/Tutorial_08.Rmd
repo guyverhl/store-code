@@ -1,0 +1,270 @@
+---
+title: "Tutorial 08: Advanced Data Manipulation"
+author: "<br>Department of Statistics and Actuarial Science</br> The University of Hong Kong"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: paper
+    toc: yes
+    toc_depth: 3
+---
+<style>
+  body {font-size: 12pt;}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\ 
+
+
+# Before we start
+```{r eval=FALSE}
+help(package="dplyr")
+help(package="data.table")
+```
+
+- `dyplr`, `data.table` cheat sheet: [rstudio](https://rstudio.com/resources/cheatsheets/)
+
+\ 
+
+
+## `diamonds` Dataset Introduction
+
+![](tidyverse.jpg)
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+The dataset `diamonds` is stored as a tibble with `r ncol(diamonds)` variabes and `r nrow(diamonds)` samples
+
+- price: price in US dollars (326-18,823)
+- carat: weight of the diamond (0.2-5.01)
+- cut: quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+- color: diamond colour, from J (worst) to D (best)
+- claritya: measurement of how clear the diamond is 
+- x: length in mm (0-10.74)
+- y: width in mm (0-58.9)
+- z: depth in mm (0-31.8)
+- depth: total depth percentage = 2 * z / (x + y) (43-79)
+- table: width of top of diamond relative to widest point (43-95)
+
+
+ 
+```{r}
+head(diamonds)
+```
+
+
+
+```{r}
+diamonds %>% 
+  pull(cut) %>%  # extract as vector
+  class()
+```
+\ 
+
+# `dplyr` package
+
+
+## `mutate()`
+
+- `+`, `-`, `log()`, etc., for their usual mathematical meanings
+- `lead()`, `lag()`
+- `dense_rank()`, `min_rank()`, `percent_rank()`, `row_number()`, `cume_dist()`, `ntile()`
+- `cumsum()`, `cummean()`, `cummin()`, `cummax()`, `cumany()`, `cumall()`
+- `na_if()`, `coalesce()`
+- `if_else()`, `recode()`, `case_when()`
+
+```{r}
+diamonds %>% 
+  mutate(carat_sum = cumsum(carat)) %>%
+  head()
+```
+
+\ 
+
+## `select()`
+
+```{r eval=FALSE}
+?select_helpers
+```
+
+- `starts_with()`: Starts with a prefix.
+- `ends_with()`: Ends with a suffix.
+- `contains()`: Contains a literal string.
+- `matches()`: Matches a regular expression.
+- `num_range()`: Matches a numerical range like x01, x02, x03.
+- `all_of()`: Matches variable names in a character vector. All names must be present, otherwise an out-of-bounds error is thrown.
+- `any_of()`: Same as all_of(), except that no error is thrown for names that don't exist.
+- `everything()`: Matches all variables.
+- `last_col()`: Select last variable, possibly with an offset.
+
+```{r}
+diamonds %>% 
+  mutate(carat_sum = cumsum(carat)) %>%
+  select(last_col()) %>% 
+  head()
+```
+
+
+
+\ 
+
+## `filter()`
+
+- `filter` allows you to select a subset of rows.
+    - Mathematical relationship: `==`, `<`, `<=`, `>`, `>=`
+    - Logical Operators: `&`, `|`, `!`
+    - `%in%`, `is.na()`, `between()`
+    - The `.` syntax
+
+```{r}
+# filter(diamonds, cut == "Premium")[1:6,]
+
+diamonds %>% 
+  filter(cut == "Premium") %>% 
+  .[1:6,]
+```
+
+
+
+```{r}
+diamonds %>% 
+  filter(x>=5 & cut %in% c("Premium","Ideal")) %>% 
+  head()
+```
+
+
+\
+
+
+
+## `summarise()`
+
+- Center: `mean()`, `median()`
+- Spread: `sd()`, `IQR()`, `mad()`
+- Range: `min()`, `max()`, `quantile()`
+- Position: `first()`, `last()`, `nth()`,
+- Count: `n()`, `n_distinct()`
+- Logical: `any()`, `all()`
+
+```{r}
+diamonds %>%
+  group_by(clarity) %>%
+  summarise(n()) 
+
+diamonds %>%
+  group_by(clarity) %>%
+  summarise(n_distinct(color)) 
+```
+
+\ 
+
+
+## `join` functions in `dplyr`
+
+- `inner_join()`
+- `left_join()`
+- `full_join()`
+
+![](joins.jpg)
+
+\ 
+
+
+## Combining Pipeline `%>%` with ggplot
+Powerful trick for coding a sequence of operations.
+
+- Example 1 
+```{r, fig.width=6, fig.height=3, fig.align='center', warning = FALSE, message = FALSE}
+diamonds %>%
+  filter(x>0, y>0, y<20) %>%
+  mutate(sym=x-y, size=pi*((x+y)/2/2)^2) %>%
+  filter(abs(sym)<0.2) %>%
+  group_by(carat) %>%
+  summarize(price=mean(price)) %>%
+  ggplot(aes(carat, price)) + geom_line() + geom_smooth()
+```
+
+
+- Example 2
+```{r, fig.width=6, fig.height=3, fig.align='center'}
+diamonds %>%
+  filter(x>0, y>0, y<20) %>%
+  mutate(sym=x-y, size=pi*((x+y)/2/2)^2) %>%
+  filter(abs(sym)<0.2) %>%
+  group_by(clarity) %>%
+  summarize(price=mean(price)) %>%
+  ggplot(aes(clarity, price))+
+  geom_line(aes(group=1))+ geom_point(size=2)
+```
+
+
+- Example 3
+```{r, fig.width=6, fig.height=3, fig.align='center'}
+diamonds %>%
+  filter(x>0, y>0, y<20) %>%
+  mutate(sym=x-y, size=pi*((x+y)/2/2)^2) %>%
+  filter(abs(sym)<0.2) %>%
+  group_by(cut, depth) %>%
+  summarize(n=n()) %>%
+  ggplot(aes(depth)) + geom_histogram(bins=30)
+```
+
+
+- Example 4
+```{r, fig.width=6, fig.height=3, fig.align='center'}
+diamonds %>%
+  filter(x>0, y>0, y<20) %>%
+  mutate(sym=x-y, size=pi*((x+y)/2/2)^2) %>%
+  filter(abs(sym)<0.2) %>%
+  group_by(cut, depth) %>%
+  summarize(n=n()) %>%
+  filter(depth>50, depth<75) %>%
+  mutate(prop=n/sum(n)) %>%
+  ggplot(aes(depth, prop, color=cut)) + geom_line()
+```
+
+
+
+
+\ 
+
+# Exercises
+
+We have a built-in dataset `table2`. It records the number of TB (tuberculosis) cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000. 
+```{r,fig.align="center", fig.width=5, fig.height=4}
+table2
+```
+
+
+
+- Extract the number of cases per country per year.
+- Extract the matching population per country per year.
+- Divide cases by population, and multiply by 10000.
+
+```{r, echo=FALSE}
+(t2_cases <- filter(table2, type == "cases") %>%
+  rename(cases = count) %>%
+  select(-type) %>%
+  arrange(country, year) %>%
+  head())
+
+(t2_population <- filter(table2, type == "population") %>%
+  rename(population = count) %>%
+  select(-type) %>%
+  arrange(country, year) %>%
+  head())
+
+(t2_cases_per_cap <- t2_cases %>%
+  mutate(population = t2_population$population,
+         cases_per_cap = (cases / population) * 10000) %>%
+  select(country, year, cases_per_cap) %>%
+  head())
+```
+
+

@@ -1,0 +1,189 @@
+---
+title: 'Tutorial 05: Linear Regression'
+author: '<br>Department of Statistics and Actuarial Science</br> The University of Hong Kong'
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+---
+<style>
+  body {font-size: 12pt;}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+\ 
+
+
+# R Markdown 
+
+* [Micro-video tutorial](https://rmarkdown.rstudio.com/lesson-1.html)
+* [The R markdown cheatsheet](https://rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf)  
+or through Menu -> Help -> Cheatsheets -> R Markdown Cheat Sheet
+* Installation
+
+```{r eval=FALSE}
+install.packages("rmarkdown")
+```
+\ 
+
+
+# Linear Regression
+
+## Data
+**Boston Housing data**
+  
+The Boston data frame has 506 rows and 14 columns. medv is the response variable $y$.  
+This data frame contains the following columns:
+
+* "crim": per capita crime rate by town.
+* "zn": proportion of residential land zoned for lots over 25,000 sq.ft.
+* "indus": proportion of non-retail business acres per town.
+* "chas": Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).
+* "nox": nitrogen oxides concentration (parts per 10 million).
+* "rm": average number of rooms per dwelling.
+* "age": proportion of owner-occupied units built prior to 1940.
+* "dis": weighted mean of distances to five Boston employment centres.
+* "rad": index of accessibility to radial highways.
+* "tax": full-value property-tax rate per \$10,000.
+* "ptratio": pupil-teacher ratio by town.
+* "black": 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.
+* "lstat": lower status of the population (percent).
+* "medv": median value of owner-occupied homes in \$1000s.
+
+```{r echo=TRUE, message=FALSE}
+library(MASS)
+head(Boston)
+colnames(Boston)
+```
+\ 
+
+
+## Explanatory Data Analysis
+```{r}
+# We use pairs() function
+# Tilde is used to separate the left- and right-hand sides in a model formula
+pairs(medv~ zn + indus + lstat + dis + rm + crim , data = Boston, main = "Boston Data")
+```
+\ 
+
+
+## Standardization
+If we want our results to be invariant to the units and the parameter estimates $\beta_i$ to be comparible, we can standardize the variables. Essentially we are replacing the original values with their z-score.
+
+```{r}
+for (i in 1:ncol(Boston)){
+  if (i != 14) {
+    Boston[,i] = scale(Boston[,i])
+  }
+}
+```
+\ 
+
+
+## Model Building
+
+In simple linear regression, we try to minimize the sum of squared error:
+  $$SSE(\beta) = \sum e^2_i = \sum(y_i-\hat{y_i})^2={\bf (y-X\beta)^T(y-X\beta)}$$
+  Differentiating with respect to $\beta$:
+  $$\frac{\partial SSE(\beta)}{\partial\beta} = -2 {\bf X^T(y-X\beta)}$$
+  Setting to zero leads to the normal equation:
+  $${\bf X^TX\hat{\beta}=X^Ty}$$
+  Since $X^TX$ is invertible:
+  $${\bf \hat{\beta}=(X^TX)^{-1}X^Ty}$$
+  $${\bf \hat{y}=X\hat{\beta}}$$
+  
+  The following model includes all $x$ varables in the model
+
+```{r}
+model_1 = lm(medv~., data=Boston)
+summary(model_1)
+```
+
+**More details of the model**
+
+```{r, eval=TRUE}
+coefficients(model_1) # model coefficients
+confint(model_1, level=0.95) # CIs for model parameters 
+fitted(model_1)[1:6] # predicted values
+residuals(model_1)[1:6]  # residuals
+anova(model_1) # anova table 
+vcov(model_1) # covariance matrix for model parameters
+```
+
+**Interaction terms or in model**
+  
+```{r, eval=TRUE}
+#The following way automatically add the main and interaction effects of crim and zn
+lm(medv~crim*zn, data=Boston)
+lm(medv~crim*zn*rad + indus, data=Boston)
+```
+
+**Using Nonlinear variables**
+```{r, eval=TRUE}
+#The following way automatically add the main and interaction effects of crim and zn
+Boston_new = Boston
+Boston_new$rm_2 <- Boston_new$rm*Boston_new$rm
+lm(medv~rm_2, data=Boston_new)
+```
+\ 
+
+
+## Model Checking
+
+Residual histogram with normal density
+```{r warning=FALSE, fig.width=6, fig.height=3.5}
+plot(model_1$fitted.values, model_1$res, xlab="Fitted", ylab="Residuals", main="Residual Plot")
+abline(h=0)
+hist(model_1$res, main="Residual Histogram")
+qqnorm(model_1$res, ylab="Residuals")
+qqline(model_1$res)
+```
+\ 
+
+
+## Model Evaluation
+
+**Compare two nested model**
+  ```{r, results='hide'}
+model_1 = lm(medv~., data = Boston)
+model_2 = lm(medv~lstat + rm + ptratio + dis + nox + chas + black + zn +  crim + rad + tax, data = Boston)
+summary(model_1)
+summary(model_2)
+```
+```{r}
+anova(model_1, model_2)
+```
+
+**In-sample prediction**
+  
+To evaluate how the model performs on future data, we use predict() to get the predicted values from the test set.
+```{r}
+#pred is a vector that contains predicted values for test set.
+pred1 = predict(object = model_1, Boston)
+pred2 = predict(object = model_2, Boston)
+```
+
+The most common measure is the Mean Squared Error (MSE): average of the squared differences between the predicted and actual values
+```{r}
+mean((pred1 - Boston$medv)^2)
+mean((pred2 - Boston$medv)^2)
+```
+Another measure is the Mean Absolute Error (MAE). You can probably guess that here instead of taking the average of squared error, MAE is the average of absolute value of error.
+```{r}
+mean(abs(pred1 - Boston$medv))
+mean(abs(pred2 - Boston$medv))
+```
+\ 
+
+
+
+# Exercise
+
+**Build a linear model to predict `Petal.Width` in `iris` dataset. Then evaluate the model.**
+
+```{r}
+lm(Petal.Width ~ Sepal.Length + Sepal.Width + Petal.Length, data=iris)
+```
+

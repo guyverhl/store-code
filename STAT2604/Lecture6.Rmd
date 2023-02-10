@@ -1,0 +1,241 @@
+---
+title: "STAT2604 Lecture 6"
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ISwR)
+```
+
+## One-way ANOVA (analysis of variance)
+
+$$X_{ij} = \mu + \alpha_i + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim N(0,\sigma^2)$$
+```{r echo=TRUE}
+folate = red.cell.folate$folate
+ventilation = red.cell.folate$ventilation
+folate
+length(folate)
+table(ventilation)
+```
+
+```{r echo=TRUE}
+anova(lm(folate~ventilation))
+summary(lm(folate~ventilation))
+```
+
+## Relaxing the equal variance assumption
+
+```{r,echo=TRUE}
+oneway.test(folate~ventilation)
+```
+
+## pairwise t test
+```{r,echo=TRUE}
+pairwise.t.test(folate,ventilation,pool.sd=F)
+```
+
+## graphical demo 
+```{r,echo=TRUE}
+ xbar <- tapply(folate, ventilation, mean)
+ s <- tapply(folate, ventilation, sd)
+ n <- tapply(folate, ventilation, length)
+ sem <- s/sqrt(n)
+ stripchart(folate~ventilation, method="jitter",jitter=0.05, pch=16, vert=T)
+ arrows(1:3,xbar+sem,1:3,xbar-sem,angle=90,code=3,length=.1)
+ lines(1:3,xbar,pch=4,type="b",cex=2)
+```
+
+## Bartlett's test for Variance 
+```{r,echo=TRUE}
+bartlett.test(folate~ventilation)
+```
+
+## Kruskal-Wallis test
+```{r,echo=TRUE}
+kruskal.test(folate~ventilation)
+```
+
+
+## Two-way ANOVA (analysis of variance)
+
+$$X_{ij} = \mu + \alpha_i + \beta_j + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim N(0,\sigma^2)$$
+
+```{r echo=TRUE}
+x = heart.rate$hr
+x
+group1 = heart.rate$subj
+table(group1)
+group2 = heart.rate$time
+table(group2)
+```
+
+```{r echo=TRUE}
+anova(lm(x~group1+group2))
+```
+
+## Interaction plot
+```{r,echo=TRUE}
+interaction.plot(group1, group2, x)
+```
+
+
+
+
+
+## Tabular Data
+
+- **Single proportions**
+
+```{r echo=TRUE}
+binom.test(x=10, n=100, p=.3)
+```
+
+----
+
+- **Two independent proportions**
+
+```{r echo=TRUE}
+matrix(c(50,70,50,30),2, dimnames=list(c('group1','group2'), c('positive','negative')))
+
+fisher.test(matrix(c(50,70,50,30),2))
+```
+
+## chi-square test 
+```{r}
+chisq.test(matrix(c(50,70,50,30),2))
+```
+
+
+
+----
+
+- **k proportions**
+
+```{r echo=TRUE}
+caesar.shoe
+```
+
+```{r echo=TRUE, warning=FALSE}
+caesar.shoe.yes <- caesar.shoe["Yes",]
+caesar.shoe.total <- margin.table(caesar.shoe,2)
+prop.test(caesar.shoe.yes,caesar.shoe.total)
+```
+
+## Testing for Trend
+```{r}
+prop.trend.test(caesar.shoe.yes,caesar.shoe.total)
+```
+
+
+----
+
+- **Tables with more than two classes on both sides**
+
+```{r echo=TRUE}
+caff.marital <- matrix(c(652,1537,598,242,36,46,38,21,218,327,106,67), nrow=3,byrow=T)
+colnames(caff.marital) <- c("0","1-150","151-300",">300")
+rownames(caff.marital) <- c("Married","Prev.married","Single")
+caff.marital
+```
+
+```{r echo=TRUE}
+chisq.test(caff.marital)
+```
+
+
+```{r echo=TRUE}
+O = chisq.test(caff.marital)$observed
+E = chisq.test(caff.marital)$expected
+(O-E)^2/E
+```
+
+
+
+
+## Power and Sample Size Calculation
+
+- The hypothesis is correct, but the test rejects it (type I error).
+- The hypothesis is wrong, but the test accepts it (type II error).
+
+The probability of rejecting a false hypothesis is called the *power* of the test
+
+----
+
+- **E.g., power of t tests**
+
+```{r echo=TRUE}
+curve(pt(x, df=25, ncp=3), from=0, to=6)
+abline(v = qt(p=.975, df=25))
+1 - pt(qt(p=.975, df=25), df=25, ncp=3)
+```
+
+
+
+
+- **Power calcluation problems**
+
+```{r echo=TRUE}
+power.t.test(delta=0.5, sd=2, sig.level = 0.05, power=0.8)
+```
+
+
+```{r echo=TRUE}
+power.t.test(n=477, delta=0.5, sd=2, sig.level = 0.01)
+power.prop.test(power=.85,p1=.15,p2=.30)
+```
+
+`delta` stands for the "true difference", and `sd` is the standard deviation.
+
+
+
+
+
+## Logistic Regression
+
+$$\mathrm{logit}\ p \equiv \log\Bigr(\frac{p}{1-p}\Bigl) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k$$
+$$p = \frac{exp(\beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k)}{1 + exp(\beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k)}$$
+$$\max_{\beta_0,\beta_1,\cdots,\beta_k} L(\beta_0,\beta_1,\cdots,\beta_k)= \bigg(\frac{exp(\beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k)}{1 + exp(\beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k)}\bigg)^y(1-p)^{(1-y)}$$
+
+```{r echo=FALSE}
+juul$menarche <- factor(juul$menarche, labels=c("No","Yes"))
+juul$tanner <- factor(juul$tanner)
+juul.girl <- subset(juul,age>8 & age<20 & complete.cases(menarche))
+y <- juul.girl$menarche
+y ## response, y
+x <- juul.girl$age
+```
+
+```{r echo=TRUE}
+glm.fit = glm(y~x, binomial)
+summary(glm.fit)
+```
+```{r}
+anova(glm.fit,test="Chisq")
+```
+
+```{r}
+confint(glm.fit)
+```
+
+```{r}
+ library(MASS)
+ plot(profile(glm.fit))
+```
+
+```{r}
+#predict(glm.fit)
+predict.y = predict(glm.fit)
+```
+
+----
+```{r}
+## logit scale, it is linear in x 
+plot(predict.y ~ x, type="l")
+```
+
+
+
+

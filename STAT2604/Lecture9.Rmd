@@ -1,0 +1,471 @@
+---
+title: "Lecture 9"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Unsupervised Learning: PCA and clustering 
+### Data description 
+
+* Human breast mass that was or was not malignant
+* 10 features measured of each cell nuclei (total 30 though)
+* each features is a summary statistic of the cells in that mass
+* includes diagnosis (target) - can be used for supervised learning but will not be used during the unsupervised analysis
+
+### overall steps
+ +  download and prepare data
+ +  EDA
+ +  perform PCA and interpret results
+ +  complete two types of clustering
+ +  understand and compare the two types
+ +  combine PCA and clustering
+
+```{r}
+## Preparing the data
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+url <- "http://s3.amazonaws.com/assets.datacamp.com/production/course_1903/datasets/WisconsinCancer.csv"
+# Download the data: wisc.df
+wisc.df <- read.csv(url)
+str(wisc.df)
+# Convert the features of the data: wisc.data
+wisc.data <- as.matrix(wisc.df[, 3:32])
+str(wisc.data)
+head(wisc.data)
+# Set the row names of wisc.data
+row.names(wisc.data) <- wisc.df$id
+head(wisc.data)
+# Create diagnosis vector
+diagnosis = as.numeric(wisc.df$diagnosis == "M")
+# Exploratory data analysis
+# How many observations are in this dataset?
+# 569
+# How many variables/features in the data are suffixed with _mean?
+# 10
+# How many of the observations have a malignant diagnosis?
+# 212
+
+str(wisc.data)
+colnames(wisc.data)
+str_match(colnames(wisc.data), "_mean")
+table(diagnosis)
+
+## Performing PCA
+# Check column means and standard deviations
+round(colMeans(wisc.data), 2)
+round(apply(wisc.data, 2, sd), 2)
+# Execute PCA, scaling if appropriate: wisc.pr
+wisc.pr <- prcomp(wisc.data, scale = T, center = T)
+
+# Look at summary of results
+summary(wisc.pr)
+#install.packages("remotes")
+#remotes::install_github("ssinari/smisc")
+## Interpreting PCA results
+# Create a biplot of wisc.pr
+biplot(wisc.pr)
+# Scatter plot observations by components 1 and 2
+plot(wisc.pr$x[, c(1, 2)], col = (diagnosis + 1), xlab = "PC1", ylab = "PC2")
+# Repeat for components 1 and 3
+plot(wisc.pr$x[, c(1, 3)], col = (diagnosis + 1), xlab = "PC1", ylab = "PC3") 
+# Do additional data exploration of your choosing below (optional)
+plot(wisc.pr$x[, c(2, 3)], col = (diagnosis + 1),  xlab = "PC2", ylab = "PC3")
+# We can see from the charts that pc1 and pc2 overlap less than pc1 and pc3.
+# This is expected as pc1 and pc2 are meant to be orthogonal and explain different variance
+
+## Variance explained
+# Set up 1 x 2 plotting grid
+par(mfrow = c(1, 2))
+
+# Calculate variability of each component
+pr.var <- wisc.pr$sdev^2
+
+# Variance explained by each principal component: pve
+pve <- pr.var / sum(pr.var)
+
+# Plot variance explained for each principal component
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+## What is the minimum number of principal components required to explain 80% of the variance of the data?
+## 5
+
+wisc.pr$rotation[1:10,1:2]
+
+# Hierarchical clustering of case data
+# Scale the wisc.data data: data.scaled
+head(wisc.data)
+data.scaled <- scale(wisc.data)
+head(data.scaled)
+
+# Calculate the (Euclidean) distances: data.dist
+data.dist <- dist(data.scaled)
+# Create a hierarchical clustering model: wisc.hclust
+wisc.hclust <- hclust(data.dist, method = "complete")
+# Results of hierarchical clustering
+# cutting the height at 20 will give 4 clusters
+plot(wisc.hclust)
+
+## Selecting number of clusters
+# Cut tree so that it has 4 clusters: wisc.hclust.clusters
+wisc.hclust.clusters <- cutree(wisc.hclust, k = 4)
+
+# Compare cluster membership to actual diagnoses
+table(wisc.hclust.clusters, diagnosis)
+# count out of place observations based on cluster 
+# basically just summing the row mins here
+sum(apply(table(wisc.hclust.clusters, diagnosis), 1, min))
+## Looks like 54 tumors that are not clear with the diagnosis based on the general cluster
+
+## k-means clustering and comparing results
+# Create a k-means model on wisc.data: wisc.km
+head(wisc.data)
+wisc.km <- kmeans(scale(wisc.data), centers = 2, nstart = 20)
+
+# Compare k-means to actual diagnoses
+table(wisc.km$cluster, diagnosis)
+sum(apply(table(wisc.km$cluster, diagnosis), 1, min))
+
+# Compare k-means to hierarchical clustering
+table(wisc.hclust.clusters, wisc.km$cluster)
+
+sum(apply(table(wisc.hclust.clusters, wisc.km$cluster), 1, min))
+
+## Clustering on PCA results
+## Recall from earlier exercises that the PCA model required significantly fewer features to describe 80% and 95% of the variability of the data.In addition to normalizing data and potentially avoiding overfitting, PCA also uncorrelates the variables, sometimes improving the performance of other modeling techniques.
+# Create a hierarchical clustering model: wisc.pr.hclust
+summary(wisc.pr)
+
+wisc.pr.hclust <- hclust(dist(wisc.pr$x[, 1:7]), method = "complete")
+
+# Cut model into 4 clusters: wisc.pr.hclust.clusters
+wisc.pr.hclust.clusters <- cutree(wisc.pr.hclust, k = 4)
+
+# Compare to actual diagnoses
+t <- table(wisc.pr.hclust.clusters, diagnosis)
+t
+sum(apply(t, 1, min))
+# Compare to k-means and hierarchical
+t <- table(wisc.hclust.clusters, diagnosis)
+t
+sum(apply(t, 1, min))
+
+t <- table(wisc.km$cluster, diagnosis)
+t
+
+sum(apply(t, 1, min))
+# It looks like the 2 cluster k-means does the best job
+
+```
+
+
+## Supervised Learning 
+
+
+### KNN algorithm 
+K-nearest neighbours works by directly measuring the (Euclidean) distance between observations and inferring the class of unlabeled data from the class of its nearest neighbours. Typically in machine learning, there are two clear steps, where one first trains a model and then uses the model to predict new outputs (class labels in this case). In the kNN, these two steps are combined into a single function call to `knn()`.
+
+Lets draw a set of 50 random iris observations to train the model and predict the species of another set of 50 randomly chosen flowers. The `knn()` function takes the training data, the new data (to be inferred) and the labels of the training data, and returns (by default) the predicted class.
+```{r,echo=T}
+set.seed(12L)
+tr <- sample(150, 50)
+nw <- sample(150, 50)
+head(iris)
+library("class")
+knnres <- knn(iris[tr, -5], iris[nw, -5], iris$Species[tr])
+head(knnres)
+
+```
+We can now compare the observed kNN-predicted class and the expected known outcome and calculate the overall accuracy of our model.
+```{r,echo=T}
+table(knnres, iris$Species[nw])
+mean(knnres == iris$Species[nw])
+```
+We have omitted an important argument from `knn()`, which is the parameter k of the classifier. This parameter defines how many nearest neighbours will be considered to assign a class to a new unlabeled observation. From the arguments of the function,
+```{r}
+args(knn)
+```
+
+
+we see that the default value is 1. But is this a good value? Wouldn't we prefer to look at more neighbours and infer the new class using a vote based on more labels? This introductory example leads to two important and related questions that we need to consider: How can we do a good job in training and testing data? In the example above, we choose random training and new data. How can we estimate our model parameters (k in the example above) so as to obtain good classification accuracy?
+
+### Model performance
+#### In-sample and out-of-sample error
+
+In supervised machine learning, we have a desired output and thus know precisely what is to be computed. It thus becomes possible to directly evaluate a model using a quantifiable and objective metric. For regression, we will use the root mean squared error (RMSE), which is what linear regression (`lm()` in R) seeks to minimize. For classification, we will use model prediction accuracy.
+
+Typically, we won't want to calculate any of these metrics using observations that were also used to calculate the model. This approach, called in-sample error leads to optimistic assessment of our model. Indeed, the model has already seen these data upon construction, and is considered optimized for these observations in particular; it is said to over-fit the data. We prefer to calculate an out-of-sample error, on new data, to gain a better idea of how to model performs on unseen data, and estimate how well the model generalizes.
+
+In this course, we will focus on the caret package for Classification And REgression Training (see also https://topepo.github.io/caret/index.html). It provides a common and consistent interface to many, often repetitive, tasks in supervised learning.
+
+```{r}
+library("caret")
+```
+
+The code chunk below uses the `lm()` function to model the price of round cut diamonds and then predicts the price of these very same diamonds with the predict function.
+
+```{r}
+data(diamonds)
+model <- lm(price ~ ., diamonds)
+p <- predict(model, diamonds)
+```
+Let's now repeat the exercise above, but by calculating the out-of-sample RMSE. We prepare a 80/20 split of the data and use 80% to fit our model, and predict the target variable (this is called the training data), the price, on the 20% of unseen data (the testing data).
+
+The values for the out-of-sample RMSE will vary depending on what exact split was used. The diamonds is a rather extensive data set, and thus even when building our model using a subset of the available data (80% above), we manage to generate a model with a low RMSE, and possibly lower than the in-sample error.
+
+When dealing with datasets of smaller sizes, however, the presence of a single outlier in the train and test data split can substantially influence the model and the RMSE. We can't rely on such an approach and need a more robust one where we can generate and use multiple, different train/test sets to sample a set of RMSEs, leading to a better estimate of the out-of-sample RMSE.
+
+#### Cross-validation
+Instead of doing a single training/testing split, we can systematize this process, produce multiple, different out-of-sample train/test splits, that will lead to a better estimate of the out-of-sample RMSE. One would typically do a 10-fold cross validation (if the size of the data permits it). We split the data into 3 random and complementary folds, so that each data point appears exactly once in each fold. This leads to a total test set size that is identical to the size of the full dataset but is composed of out-of-sample predictions. 
+
+After cross-validation, all models used within each fold are discarded, and a new model is built using the whole dataset, with the best model parameter(s), i.e those that generalized over all folds.
+
+This makes cross-validation quite time consuming, as it takes x+1 (where x in the number of cross-validation folds) times as long as fitting a single model, but is essential.
+
+Note that it is important to maintain the class proportions within the different folds, i.e. respect the proportion of the different classes in the original data. This is also taken care when using the caret package.
+
+The procedure of creating folds and training the models is handled by the train function in caret. Below, we apply it to the diamond price example that we used when introducing the model performance.
+
+* We start by setting a random seed to be able to reproduce the example.
+* We specify the method (the learning algorithm) we want to use. Here, we use `lm`, but, as we will see later, there are many others to choose from1.
+* We then set the out-of-sample training procedure to 10-fold cross validation (`method = "cv"` and `number = 10`). To simplify the output in the material for better readability, we set the verbosity flag to FALSE, but it is useful to set it to TRUE in interactive mode.
+
+```{r}
+set.seed(42)
+model <- train(price ~ ., diamonds,
+               method = "lm",
+               trControl = trainControl(method = "cv",
+                                        number = 10,
+                                        verboseIter = FALSE))
+model
+```
+
+Once we have trained our model, we can directly use this train object as input to the predict method:
+
+```{r}
+p <- predict(model, diamonds)
+error <- p - diamonds$price
+rmse_xval <- sqrt(mean(error^2)) ## xval RMSE
+rmse_xval
+```
+
+```{r}
+library("MASS")
+data(Boston)
+model <- train(medv ~ .,
+               Boston,
+               method = "lm",
+               trControl = trainControl(method = "cv",
+                                        number = 10))
+model
+p <- predict(model, Boston)
+sqrt(mean((p - Boston$medv)^2))
+```
+
+### Classification performance
+Above, we have used the RMSE to assess the performance of our regression model. When using a classification algorithm, we want to assess its accuracy to do so.
+
+#### Confusion matrix
+Instead of calculating an error between predicted value and known value, in classification we will directly compare the predicted class matches with the known label. To do so, rather than calculating the mean accuracy as we did above, in the introductory kNN example, we can calculate a confusion matrix.
+
+A confusion matrix contrasts predictions to actual results. Correct results are true positives (TP) and true negatives (TN) are found along the diagonal. All other cells indicate false results, i.e false negatives (FN) and false positives (FP).
+
+Intuitively, we might want to use 0.5 as a threshold, and assign every result with a probability > 0.5 to Yes and No otherwise.
+
+#### Receiver operating characteristic (ROC) curve
+There is no reason to use 0.5 as a threshold. One could use a low threshold to catch more mines with less certainty or or higher threshold to catch fewer mines with more certainty.
+
+This illustrates the need to adequately balance TP and FP rates. We need to have a way to do a cost-benefit analysis, and the solution will often depend on the question/problem.
+
+One solution would be to try with different classification thresholds. Instead of inspecting numerous confusion matrices, it is possible to automate the calculation of the TP and FP rates at each threshold and visualize all results along a ROC curve.
+
+#### AUC in caret
+When using `caret`'s `trainControl()` function to train a model, we can set it so that it computes the ROC and AUC properties for us.
+
+```{r}
+## Create trainControl object: myControl
+library("mlbench")
+data(Sonar)
+library("caret")
+myControl <- trainControl(
+    method = "cv", ## cross validation
+    number = 10,   ## 10-fold
+    summaryFunction = twoClassSummary, ## NEW
+    classProbs = TRUE, # IMPORTANT
+    verboseIter = FALSE
+)
+## Train glm with custom trainControl: model
+model <- train(Class ~ ., Sonar,
+               method = "glm", ## to use glm's logistic regression
+               trControl = myControl)
+
+## Print model to console
+print(model)
+```
+
+
+### Random Forest 
+Random forest models are accurate and non-linear models and robust to over-fitting and hence quite popular. They however require hyperparameters to be tuned manually, like the value k in the example above.
+
+Building a random forest starts by generating a high number of individual decision trees. A single decision tree isn't very accurate, but many different trees built using different inputs (with bootstrapped inputs, features and observations) enable us to explore a broad search space and, once combined, produce accurate models, a technique called bootstrap aggregation or bagging.
+
+#### Decision trees
+A great advantage of decision trees is that they make a complex decision simpler by breaking it down into smaller, simpler decisions using a divide-and-conquer strategy. They basically identify a set of if-else conditions that split the data according to the value of the features.
+
+```{r}
+library("rpart") ## recursive partitioning
+m <- rpart(Class ~ ., data = Sonar,
+           method = "class")
+library("rpart.plot")
+rpart.plot(m)
+p <- predict(m, Sonar, type = "class")
+table(p, Sonar$Class)
+```
+
+Decision trees choose splits based on most homogeneous partitions, and lead to smaller and more homogeneous partitions over their iterations.
+
+An issue with single decision trees is that they can grow, and become large and complex with many branches, which corresponds to over-fitting. Over-fitting models noise, rather than general patterns in the data, focusing on subtle patterns (outliers) that won't generalize.
+
+To avoid over-fitting, individual decision trees are pruned. Pruning can happen as a pre-condition when growing the tree, or afterwards, by pruning a large tree.
+
+* Pre-pruning: stop growing process, i.e stops divide-and-conquer after a certain number of iterations (grows tree to a certain predefined level), or requires a minimum number of observations in each mode to allow splitting.
+
+* Post-pruning: grow a large and complex tree, and reduce its size; nodes and branches that have a negligible effect on the classification accuracy are removed.
+
+
+### Training a random forest
+Let's return to random forests and train a model using the train function from caret:
+```{r}
+set.seed(12)
+library(caret)
+library(ranger)
+model <- train(Class ~ .,
+               data = Sonar,
+               method = "ranger")
+print(model)
+plot(model)
+```
+
+
+###  Model selection
+In this final section, we are going to compare different predictive models and choose the best one using the tools presented in the previous sections.
+
+To to so, we are going to first create a set of common training controller object with the same train/test folds and model evaluation metrics that we will re-use. This is important to guarantee fair comparison between the different models.
+
+For this section, we are going to use the churn data. Below, we see that about 15% of the customers churn. It is important to maintain this proportion in all of the folds.
+```{r}
+library("modeldata")
+data(mlc_churn, package = "modeldata")
+churnTrain <- mlc_churn[1:3333, ]
+churnTest <- mlc_churn[3334:5000, ]
+library("C50")
+table(churnTrain$churn)/nrow(churnTrain)
+myFolds <- createFolds(churnTrain$churn, k = 5)
+str(myFolds)
+
+myControl <- trainControl(
+  summaryFunction = twoClassSummary,
+  classProb = TRUE,
+  verboseIter = FALSE,
+  savePredictions = TRUE,
+  index = myFolds
+)
+
+```
+
+#### glmnet model 
+```{r}
+glm_model <- train(churn ~ .,
+                   churnTrain,
+                   metric = "ROC",
+                   method = "glmnet",
+                   tuneGrid = expand.grid(
+                       alpha = 0:1,
+                       lambda = 0:10/10),
+                   trControl = myControl)
+print(glm_model)
+plot(glm_model)
+
+```
+
+Below, we are going to repeat this same modelling with a variety of different classifiers, some of which we haven't looked at. This illustrates another advantage of of using meta-packages such as caret, that provide a consistent interface to different back-ends (in this case for machine learning). Once we have mastered the interface, it becomes easy to apply it to a new back-end.
+
+Note that some of the model training below will take some time to run, depending on the tuning parameter settings.
+
+#### random forest model
+```{r}
+rf_model <- train(churn ~ .,
+                  churnTrain,
+                  metric = "ROC",
+                  method = "ranger",
+                  tuneGrid = expand.grid(
+                      mtry = c(2, 5, 10, 19),
+                      splitrule = c("gini", "extratrees"),
+                      min.node.size = 1),
+                  trControl = myControl)
+print(rf_model)
+plot(rf_model)
+```
+## KNN model 
+```{r}
+knn_model <- train(churn ~ .,
+                   churnTrain,
+                   metric = "ROC",
+                   method = "knn",
+                   tuneLength = 20,
+                   trControl = myControl)
+print(knn_model)
+plot(knn_model)
+```
+
+## SVM
+
+```{r}
+library(kernlab)
+svm_model <- train(churn ~ .,
+                   churnTrain,
+                   metric = "ROC",
+                   method = "svmRadial",
+                   tuneLength = 10,
+                   trControl = myControl)
+print(svm_model)
+plot(svm_model)
+```
+
+#### Naive Bayes 
+```{r}
+library(naivebayes)
+nb_model <- train(churn ~ .,
+                  churnTrain,
+                  metric = "ROC",
+                  method = "naive_bayes",
+                  trControl = myControl)
+
+print(nb_model)
+plot(nb_model)
+```
+
+#### Comparing models
+```{r}
+model_list <- list(glmmet = glm_model,
+                   rf = rf_model,
+                   knn = knn_model,
+                   svm = svm_model,
+                   nb = nb_model)
+resamp <- resamples(model_list)
+resamp
+summary(resamp)
+lattice::bwplot(resamp, metric = "ROC")
+```
+
+The random forest appears to be the best one. This might be related to its ability to cope well with different types of input and require little pre-processing.

@@ -1,0 +1,147 @@
+---
+title: "Tutorial 04: The package 'ggplot2' and Basic Statistic functions"
+author: "Department of Statistics and Actuarial Science <br/> The University of Hong Kong"
+date: "2021/10/06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+\ 
+
+# Consultation hour
+* Mr. Xu Yuang (Session 1): Wed. 10:30 – 11:30am, RRS 114
+* Mr. Yao Minhao (Session 2): Fri. 4:30 – 5:30pm, RRS 112
+
+&nbsp;
+
+&nbsp;
+
+
+# The package 'ggplot2'
+```{r}
+# install.packages("ggplot2")
+library(ggplot2)
+```
+- **ggplot2 cheat sheet**: Menu -> Help -> Cheatsheets -> Data visualiazation with gglpot2
+
+&nbsp;
+
+## Quick plot 
+similar to the built-in function `plot()`
+```{r}
+qplot(Sepal.Length, Sepal.Width, data = iris)
+```
+\ 
+
+## Basic syntax
+`ggplot(dataset, aes(x, y)) + geom_xxx()`  
+* `ggplot()`: generate the plot  
+* `geom_xxx`: add plotting objects  
+
+```{r}
+ggplot(iris, aes(x = Sepal.Length, y =Sepal.Width)) + 
+  geom_point(aes(color = Species), size = 2, shape = 1)
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(color = "red", size = 2, shape = 1)
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(color = "red", size = 2, shape = 1) + 
+  geom_hline(yintercept = 3.5)
+```
+\ 
+
+
+### Graphic types in `ggplot2`
+```{r}
+ls("package:ggplot2", pattern="^geom_.+")
+```
+\ 
+
+### Other functions
+* `labs()`: add labels
+* `theme()`: titles, labels, fonts, etc.
+* `coord_cartesian(xlim, ylim)`: adjust x and y axes
+
+&nbsp;
+
+
+
+## Exercise
+```{r eval=FALSE}
+plot(1, 1, xlim=c(1,5.5), ylim=c(0,6), type="n", ann=FALSE)
+points(1:5, rep(5,5), pch=0:4)
+text((1:5)+0.4, rep(5,5), cex=0.6, (0:4)) 
+points(1:5, rep(4,5), cex=2, pch=(5:9)) 
+text((1:5)+0.4, rep(4,5), cex=0.6, (5:9))
+points(1:5, rep(3,5), cex=2, pch=(10:14))
+text((1:5)+0.4, rep(3,5), cex=0.6, (10:14))
+points(1:5, rep(2,5), cex=2, pch=(15:19))
+text((1:5)+0.4, rep(2,5), cex=0.6, (15:19))
+points((1:6)*0.8+0.2, rep(1,6), cex=2, pch=(20:25))
+text((1:6)*0.8+0.5, rep(1,6), cex=0.6, (20:25))
+title("Point characters corresponding to\n different 'pch' values")
+
+n <- 10
+mycolors <- rainbow(n)
+pie(rep(1,n),labels = mycolors,col = mycolors)
+
+plot(1, 1, xlim=c(1,5.5), ylim=c(0,7), type="n", ann=FALSE)
+for (i in 1:6) {
+  lines(1:5, rep(i,5), lty=i, col= rainbow(6)[i])
+  text(5+0.4, rep(i,5), paste("lty=",as.character(i),sep=""))
+}
+title("Point characters corresponding to\n different 'lty' values")
+```
+\ 
+
+&nbsp;
+
+
+# Summary of Basic Statistic Functions
+
+## Random Variables
+
+* **Generate Random Numbers**: 'r' + '\<distribution name\>'
+  * `runif()` uniform distribution
+  * `rnorm()` normal distribution
+  * `rexp()` exponential distribution
+  * `rt()` Student's t-distribution
+  * `rf()` F distribution
+  * `rgamma()` gamma distribution
+  * `rgeom()` geometric distribution
+  * more in package `stats` ([link](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html))
+* **Density**: 'd' + '\<distribution name\>'
+* **CDF**: 'p' + '\<distribution name\>'
+* **Quantile**: 'q' + '\<distribution name\>'
+
+&nbsp;
+
+
+## Summary Statistics
+* `summary()` basic summary statistics
+* `mean()` mean
+* `median()` median
+* `min()` minimum
+* `max()` maximum
+* `quantile()` quantile
+* `var()` variance
+* `sd()` standard deviation
+* `cov()` covariance
+* `cor()` correlation
+* ...
+
+&nbsp;
+
+
+## Tests  
+'\<test name\>' + '.test'
+
+* `t.test()` Student's t-test
+* `pairwise.t.test()` pairwise t test
+* `var.test` F test to compare two variances
+* `cor.test()` test for association/correlation between paired samples
+* `chisq.test` Pearson's Chi-squared Test for Count Data
+* ...

@@ -1,0 +1,189 @@
+---
+title: "Asm3"
+author: "Chan Hou Long, Guyver"
+date: "11/22/2021"
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+## Libraries required
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(caret)
+library(pROC)
+library(kernlab)
+library(rpart)
+library(ranger)
+```
+
+## Data inpt
+```{r}
+setwd("~/Documents/HKU/STAT2604")
+df <- read.table("ionosphere.data", header = FALSE, sep = ",")
+colnames(df)[35] <- "grade"
+```
+
+## Data cleaning
+No need to perform cleaning due to no missing data.
+```{r}
+sum(is.na(df))
+apply(apply(df,2,is.na),2,sum) ; nrow(df)
+```
+
+## a)
+```{r}
+set.seed(5312)
+
+trainIndex <- createDataPartition(df$grade, p = .8, list = FALSE)
+df.train <- df[ trainIndex,]
+df.test  <- df[-trainIndex,]
+
+control <- trainControl(
+    method = "cv",
+    number = 10,
+    summaryFunction = twoClassSummary,
+    classProbs = TRUE,
+    verboseIter = FALSE
+)
+```
+
+## b)
+```{r}
+set.seed(5312)
+lr.fit <- train(grade ~ .,
+                  df.train,
+                  metric = "ROC",
+                  method = "glm",
+                  trControl = control)
+
+pred.lr <- predict(lr.fit, newdata=df.test)
+lr.roc <- roc(df.test$grade, as.numeric(pred.lr))
+lr.roc$auc
+```
+
+```{r}
+set.seed(5312)
+knn.fit <- train(grade ~ .,
+                   df.train,
+                   metric = "ROC",
+                   method = "knn",
+                   tuneLength = 10,
+                   trControl = control)
+
+pred.knn <- predict(knn.fit, newdata=df.test)
+knn.roc <- roc(df.test$grade, as.numeric(pred.knn))
+knn.roc$auc
+```
+
+```{r}
+set.seed(5312)
+svm.fit <- train(grade ~ .,
+                   df.train,
+                   metric = "ROC",
+                   method = "svmRadial",
+                   tuneLength = 10,
+                   trControl = control)
+
+pred.svm <- predict(svm.fit, newdata=df.test)
+svm.roc <- roc(df.test$grade, as.numeric(pred.svm))
+svm.roc$auc
+```
+
+```{r}
+set.seed(5312)
+nb.fit <- train(grade ~ .,
+                  df.train,
+                  metric = "ROC",
+                  method = "naive_bayes",
+                  trControl = control)
+
+pred.nb <- predict(nb.fit, newdata=df.test)
+nb.roc <- roc(df.test$grade, as.numeric(pred.nb))
+nb.roc$auc
+```
+
+```{r}
+set.seed(5312)
+dt.fit <- train(grade ~ ., 
+                  df.train,
+                  metric = "ROC",
+                  method="rpart",
+                  trControl=control)
+
+pred.dt <- predict(dt.fit, newdata=df.test)
+dt.roc <- roc(df.test$grade, as.numeric(pred.dt))
+dt.roc$auc
+```
+
+```{r}
+set.seed(5312)
+rf.fit <- train(grade ~ ., 
+                  df.train,
+                  metric = "ROC",
+                  method="ranger",
+                  trControl=control)
+
+pred.rf <- predict(rf.fit, newdata=df.test)
+rf.roc <- roc(df.test$grade, as.numeric(pred.rf))
+rf.roc$auc
+```
+
+```{r}
+set.seed(5312)
+glmnet.fit <- train(grade ~ .,
+                   df.train,
+                   metric = "ROC",
+                   method = "glmnet",
+                   tuneGrid = expand.grid(
+                       alpha = 0:1,
+                       lambda = 0:10/10),
+                   trControl = control)
+
+pred.glmnet <- predict(glmnet.fit, newdata=df.test)
+glmnet.roc <- roc(df.test$grade, as.numeric(pred.glmnet))
+glmnet.roc$auc
+```
+
+# c)
+From the graph, it can be seen that random forest and SVM appears to be the best one with the highest ROC median with 0.99. Combined with the result of the AUC, the SVM should become the best model with AUC 0.90.
+```{r}
+set.seed(5312)
+model_list <- list(glmmet = glmnet.fit,
+                   rf = rf.fit,
+                   knn = knn.fit,
+                   svm = svm.fit,
+                   nb = nb.fit,
+                   lr = lr.fit,
+                   dt = dt.fit)
+resamp <- resamples(model_list)
+summary(resamp)
+lattice::bwplot(resamp, metric = "ROC")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

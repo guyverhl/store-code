@@ -1,0 +1,302 @@
+---
+title: "Lecture 8"
+author: "Zhonghua Liu"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## The cut function 
+```{r,echo=TRUE}
+library(ISwR)
+age <- subset(juul, age >= 10 & age <= 16)$age
+agegr <- cut(age, seq(10,16,2), right=F, include.lowest=T)
+table(agegr)
+agegr2 <- cut(age, seq(10,16,2), right=F)
+table(agegr2)
+```
+
+
+## equal groupings
+```{r}
+q <- quantile(age, c(0, .25, .50, .75, 1))
+ageQ <- cut(age, q, include.lowest=T)
+table(ageQ)
+levels(ageQ) <- c("1st", "2nd", "3rd", "4th")
+levels(agegr) <- c("10-11", "12-13", "14-15")
+```
+
+
+
+## factor levels
+
+```{r cars, echo = TRUE}
+pain <- c(0,3,2,2,1)
+fpain <- factor(pain,levels=0:3, labels=c("none","mild","medium","severe"))
+fpain
+text.pain <- c("none","severe", "medium", "medium", "mild")
+factor(text.pain)
+ftpain <- factor(text.pain)
+ftpain2 <- factor(ftpain, levels=c("none", "mild", "medium", "severe"))
+```
+
+## Combine factor levels
+```{r}
+ftpain3 <- ftpain2
+levels(ftpain3) <- list( none="none", intermediate=c("mild","medium"), severe="severe")
+ftpain3
+ftpain4 <- ftpain2
+levels(ftpain4) <- c("none","intermediate","intermediate","severe")
+ftpain4
+```
+
+
+## Working with dates
+```{r,echo=TRUE}
+stroke <- read.csv2( system.file("rawdata","stroke.csv", package="ISwR"), na.strings=".")
+ names(stroke) <- tolower(names(stroke))
+ head(stroke)
+stroke <- transform(stroke, died = as.Date(died, format="%d.%m.%Y"),dstr = as.Date(dstr, format="%d.%m.%Y"))
+summary(stroke$died)
+summary(stroke$dstr)
+summary(stroke$died - stroke$dstr)
+head(stroke$died - stroke$dstr)
+```
+
+## Continue with dates
+```{r}
+stroke <- transform(stroke, end = pmin(died, as.Date("1996-1-1"), na.rm = T), dead = !is.na(died) & died < as.Date("1996-1-1"))
+head(stroke)
+stroke <- transform(stroke,obstime = as.numeric(end - dstr, units="days")/365.25)
+```
+
+
+## Recoding multiple variables
+```{r}
+ rawstroke <- read.csv2( system.file("rawdata","stroke.csv", package="ISwR"), na.strings=".")
+ ix <- c("DSTR", "DIED")
+ rawstroke[ix] <- lapply(rawstroke[ix], as.Date, format="%d.%m.%Y")
+ head(rawstroke)
+ ix <- 6:9
+ rawstroke[ix] <- lapply(rawstroke[ix], factor, levels=0:1, labels=c("No","Yes"))
+```
+
+## Conditional calculations
+
+```{r}
+strokesub <- ISwR::stroke[1:10,2:3]
+strokesub
+strokesub <- transform(strokesub, event = !is.na(died))
+strokesub <- transform(strokesub, obstime = ifelse(event, died-dstr, as.Date("1996-1-1") - dstr))
+strokesub
+```
+
+## Combining and restructuring data frames
+```{r}
+juulgrl <- subset(juul, sex==2, select=-c(testvol,sex))
+juulboy <- subset(juul, sex==1, select=-c(menarche,sex))
+juulgrl$sex <- factor("F")
+juulgrl$testvol <- NA
+juulboy$sex <- factor("M")
+juulboy$menarche <- NA
+juulall <- rbind(juulboy, juulgrl)
+names(juulall)
+levels(juulall$sex)
+```
+
+## Merging data frames
+```{r}
+head(nickel)
+head(ewrates)
+nickel <- transform(nickel, agr = trunc(agein/5)*5, ygr = trunc((dob+agein-1)/5)*5+1)
+ mrg <- merge(nickel, ewrates, by.x=c("agr","ygr"), by.y=c("age","year"))
+head(mrg,10)
+```
+
+
+## Reshaping data frames
+```{r}
+head(alkfos)
+a2 <- alkfos
+names(a2) <- sub("c", "c.", names(a2))
+names(a2)
+a.long <- reshape(a2, varying=2:8, direction="long")
+head(a.long)
+```
+
+## different sorting
+```{r}
+ o <- with(a.long, order(id, time))
+ head(a.long[o,], 10)
+```
+
+## wide format 
+```{r}
+a.long2 <- na.omit(a.long)
+attr(a.long2, "reshapeLong") <- NULL
+a.wide2 <- reshape(a.long2, direction="wide", v.names="c", idvar="id", timevar="time")
+head(a.wide2)
+```
+
+## Per-group and per-case procedures
+```{r}
+l <- split(a.long$c, a.long$id)
+l[1:3]
+l2 <- lapply(l, function(x) x / x[1])
+a.long$c.adj <- unsplit(l2, a.long$id)
+subset(a.long, id==1)
+a.long$c.adj <- ave(a.long$c, a.long$id, FUN = function(x) x / x[1])
+
+```
+
+## the whole data frame 
+```{r}
+l <- split(a.long, a.long$id)
+l2 <- lapply(l, transform, c.adj = c / c[1])
+a.long2 <- unsplit(l2, a.long$id)
+```
+
+## Polynomial regression
+
+```{r,warning=F}
+attach(cystfibr)
+summary(lm(pemax~height+I(height^2)))
+pred.frame <- data.frame(height=seq(110,180,2))
+lm.pemax.hq <- lm(pemax~height+I(height^2))
+predict(lm.pemax.hq,interval="pred",newdata=pred.frame)
+```
+
+```{r}
+pp <- predict(lm.pemax.hq,newdata=pred.frame,interval="pred")
+pc <- predict(lm.pemax.hq,newdata=pred.frame,interval="conf")
+plot(height,pemax,ylim=c(0,200))
+matlines(pred.frame$height,pp,lty=c(1,2,2),col="black")
+matlines(pred.frame$height,pc,lty=c(1,3,3),col="black")
+#detach(cystfibr)
+```
+
+
+## Regression through the origin
+```{r}
+x <- runif(20)
+y <- 2*x+rnorm(20,0,0.3)
+summary(lm(y~x))
+summary(lm(y~x-1))
+```
+
+## Design matrices and dummy variables
+
+```{r}
+model.matrix(pemax~height+weight)
+```
+
+```{r}
+attach(red.cell.folate)
+model.matrix(folate~ventilation)
+```
+
+## Interactions
+
+
+
+
+## Poisson Regression
+```{r}
+library(ISwR)
+attach(eba1977)
+names(eba1977)
+head(eba1977)
+fit <- glm(cases~city+eba1977$age+offset(log(pop)), family=poisson)
+summary(fit)
+glm(cases~city+eba1977$age, offset = log(pop), family=poisson)
+```
+
+## Poisson
+```{r}
+fit2 <- glm(cases~(city=="Fredericia")+eba1977$age+offset(log(pop)), family=poisson)
+anova(fit, fit2, test="Chisq")
+summary(fit2)
+detach(eba1977)
+```
+## Rate Ratios
+```{r}
+cf <- coefficients(summary(fit2))
+est <- cf[,1]
+s.e. <- cf[,2]
+rr <- exp(cbind(est, est - s.e.*qnorm(.975), est + s.e.*qnorm(.975) ))
+colnames(rr) <- c("RateRatio", "CI.lo","CI.hi")
+rr
+exp(cbind(coef(fit2), confint(fit2)))
+```
+
+## Computing rates
+```{r}
+head(nickel.expand)
+subset(nickel.expand, id==325)
+nickel.expand <- within(nickel.expand, lung.cancer <- as.numeric(icd %in% c(162,163)))
+attach(nickel.expand)
+pyr <- tapply(ageout-agein,list(ygr,agr), sum)
+print(round(pyr), na.print="-")
+```
+
+## Count 
+```{r}
+count <- tapply(lung.cancer, list(ygr, agr), sum)
+print(count, na.print="-")
+print(round(count/pyr*1000, 1), na.print="-")
+expect.count <- tapply(lung/1e6*(ageout-agein), list(ygr,agr), sum)
+print(round(expect.count, 1), na.print="-")
+```
+
+## Expected 
+```{r}
+expect.tot <- sum(lung/1e6*(ageout-agein))
+expect.tot
+count.tot <- sum(lung.cancer)
+count.tot
+count.tot/expect.tot
+```
+
+## Curve-fitting 
+```{r}
+t <- 0:10
+y <- rnorm(11, mean=5*exp(-t/5), sd=.2)
+plot(y ~ t)
+nlsout <- nls(y ~ A*exp(-alpha*t), start=c(A=2, alpha=0.05))
+summary(nlsout)
+```
+```{r}
+rm(list=ls())
+attach(juul2)
+head(juul2)
+attach(subset(juul2, age<20 & age>5 & sex==1))
+plot(height ~ age)
+lm(log(5.3-log(height))~age)
+```
+
+
+```{r}
+fit <- nls(height~alpha*exp(-beta*exp(-gamma*age)), start=c(alpha=exp(5.3),beta=exp(0.42),gamma=0.15))
+ summary(fit)
+```
+```{r}
+plot(age, height)
+newage <- seq(5,20,length=500)
+lines(newage, predict(fit,newdata=data.frame(age=newage)),lwd=2)
+```
+
+```{r}
+fit <- nls(log(height)~log(alpha*exp(-beta*exp(-gamma*age))), start=c(alpha=exp(5.3),beta=exp(.12),gamma=.12))
+summary(fit)
+plot(age, log(height))
+lines(newage, predict(fit,newdata=data.frame(age=newage)),lwd=2)
+summary(nls(height~SSgompertz(age, Asym, b2, b3)))
+```
+
+```{r}
+cf <- coef(nls(height ~ SSgompertz(age, Asym, b2, b3)))
+ summary(nls(log(height) ~ log(as.vector(SSgompertz(age,Asym, b2, b3))), start=as.list(cf)))
+```
+

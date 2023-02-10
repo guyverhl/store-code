@@ -1,0 +1,164 @@
+---
+title: "Tutorial 06: Introduction to Shiny Web App and Dashboard"
+author: "<br>Department of Statistics and Actuarial Science</br> The University of Hong Kong"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: paper
+    toc: yes
+    toc_depth: 3
+runtime: shiny
+---
+<style>
+  body {font-size: 12pt;}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, tidy = TRUE)
+```
+\ 
+
+
+# Introduction to Shiny 
+
+- Shiny is an R package, for easy building interactive web apps straight from R.
+- It may enable R Markdown (dynamic documents) to be interactive
+- It provides tools for building dashboards
+- Useful links
+  - [Official tutorials](https://shiny.rstudio.com/tutorial/)
+  - [Shiny cheatsheet](https://shiny.rstudio.com/images/shiny-cheatsheet.pdf)
+  - [R:shinydashboard](http://rstudio.github.io/shinydashboard/index.html)
+\ 
+
+
+
+# R Markdown with Shiny
+
+- In Rmd, add "runtime: shiny" in the header
+
+```{r echo=TRUE, eval=FALSE}
+---
+title: "XXX"
+output: html_document
+runtime: shiny
+---
+```
+
+(*Note: Rmd with Shiny cannot be output as a standalone interactive HTML file*)
+\ 
+
+
+
+# Shiny App
+## Basic Structure: app.R
+
+Shiny apps are contained in a single script called `app.R`. The script `app.R` lives in a directory (for example, `newdir/`) and the app can be run with `runApp("newdir")`. 
+
+The app has two modules:
+
+- **ui module** (in the front end): controls the layout and appearance of your app
+- **server module** (in the back end): contains the instructions that your computer needs to build your app
+
+```{r echo=TRUE, eval=FALSE}
+library(shiny)
+ui <- ...
+server <- ...
+shinyApp(ui = ui, server = server)
+```
+
+![](ui-sever.png)
+\ 
+
+
+
+
+## UI Widgets
+
+- Web/HTML elements (See the collections below). Shiny has a built-in family of functions to create these widgets. See RStudio-Shiny's [Lesson 3](https://shiny.rstudio.com/tutorial/written-tutorial/lesson3/).
+
+![](widgets.png)
+\ 
+
+
+## Built-in Examples
+
+In R console, run the following launch Shiny built-in examples 
+
+```{r echo=TRUE, eval=FALSE}
+library(shiny)
+runExample("01_hello")
+runExample("02_text")
+runExample("03_reactivity")
+runExample("04_mpg")
+runExample("05_sliders")
+runExample("06_tabsets")
+runExample("07_widgets")
+runExample("08_html")
+runExample("09_upload")
+runExample("10_download")
+runExample("11_timer")
+```
+\ 
+
+
+
+# Shiny Dashboard
+
+```{r, eval=FALSE}
+install.packages("shinydashboard")
+```
+
+
+A dashboard has three parts: a header, a sidebar, and a body.
+
+```{r, message=FALSE}
+library(shiny)
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(),
+  dashboardSidebar(),
+  dashboardBody()
+)
+
+server <- function(input, output) { }
+
+shinyApp(ui, server)
+```
+
+
+```{r, message=FALSE}
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Basic dashboard"),
+  dashboardSidebar(),
+  dashboardBody(
+    # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("plot1", height = 250)),
+
+      box(
+        title = "Controls",
+        sliderInput("slider", "Number of observations:", 1, 100, 50)
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  set.seed(122)
+  histdata <- rnorm(500)
+
+  output$plot1 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+

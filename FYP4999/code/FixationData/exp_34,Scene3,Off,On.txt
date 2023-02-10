@@ -1,0 +1,330 @@
+Participant,heritage,Text on-off,Audio on-off,Fix.startTime,Fix.endTime,Fix.duration,Fix.x,Fix.y,Fix.z,Fix.objectType
+exp_34,Scene3,Off,On,0.0200,0.1000,0.0800,-0.9977,0.0048,0.0679,Others
+exp_34,Scene3,Off,On,0.7400,0.8200,0.0800,-0.4144,0.5512,0.7242,Culturual  Heritage
+exp_34,Scene3,Off,On,2.0800,2.2000,0.1200,0.7058,0.3635,0.6081,Culturual  Heritage
+exp_34,Scene3,Off,On,2.2400,2.4000,0.1600,0.9624,0.0908,0.2562,Culturual  Heritage
+exp_34,Scene3,Off,On,2.4400,2.5200,0.0800,0.9812,0.0544,0.1852,Urban
+exp_34,Scene3,Off,On,2.5600,2.6600,0.1000,0.9767,0.0417,0.2106,Culturual  Heritage
+exp_34,Scene3,Off,On,2.7800,2.9200,0.1400,0.9873,-0.0063,0.1589,Others
+exp_34,Scene3,Off,On,2.9600,3.0200,0.0600,0.9889,0.0095,0.1482,Others
+exp_34,Scene3,Off,On,3.5600,3.6200,0.0600,0.6603,-0.0406,0.7499,Culturual  Heritage
+exp_34,Scene3,Off,On,3.7200,3.7800,0.0600,0.3321,-0.0447,0.9422,Culturual  Heritage
+exp_34,Scene3,Off,On,3.8600,3.9200,0.0600,0.0786,-0.0650,0.9948,Culturual  Heritage
+exp_34,Scene3,Off,On,3.9600,4.0800,0.1200,0.0903,-0.0413,0.9951,Culturual  Heritage
+exp_34,Scene3,Off,On,4.1600,4.2400,0.0800,-0.0152,0.0432,0.9990,Culturual  Heritage
+exp_34,Scene3,Off,On,4.5200,4.5800,0.0600,-0.3516,0.0134,0.9361,Culturual  Heritage
+exp_34,Scene3,Off,On,4.7000,4.7600,0.0600,-0.7193,0.0137,0.6946,Culturual  Heritage
+exp_34,Scene3,Off,On,5.0000,5.0600,0.0600,-0.9415,-0.0005,0.3369,Culturual  Heritage
+exp_34,Scene3,Off,On,5.2600,5.3400,0.0800,-0.9921,-0.0067,0.1256,Others
+exp_34,Scene3,Off,On,5.4800,5.5800,0.1000,-0.9958,0.0042,0.0913,Others
+exp_34,Scene3,Off,On,5.7200,5.8400,0.1200,-0.9987,0.0081,0.0497,Others
+exp_34,Scene3,Off,On,6.0600,6.1800,0.1200,-0.9510,-0.0025,-0.3093,Tamed nature
+exp_34,Scene3,Off,On,6.4800,6.5400,0.0600,-0.9975,0.0614,0.0352,Urban
+exp_34,Scene3,Off,On,6.7800,6.8400,0.0600,-0.9872,0.0841,0.1358,Culturual  Heritage
+exp_34,Scene3,Off,On,6.8800,6.9400,0.0600,-0.9618,0.0072,0.2738,Culturual  Heritage
+exp_34,Scene3,Off,On,6.9800,7.0400,0.0600,-0.9467,0.1029,0.3053,Culturual  Heritage
+exp_34,Scene3,Off,On,7.1600,7.2400,0.0800,-0.9240,0.2180,0.3141,Culturual  Heritage
+exp_34,Scene3,Off,On,7.4200,7.4800,0.0600,-0.7661,0.1121,0.6329,Culturual  Heritage
+exp_34,Scene3,Off,On,7.8800,7.9600,0.0800,-0.8208,0.1733,0.5443,Culturual  Heritage
+exp_34,Scene3,Off,On,8.0800,8.1800,0.1000,-0.8112,0.2505,0.5284,Culturual  Heritage
+exp_34,Scene3,Off,On,8.3000,8.3600,0.0600,-0.9821,-0.0067,0.1885,Others
+exp_34,Scene3,Off,On,8.4600,8.6200,0.1600,-0.9956,0.0013,0.0933,Others
+exp_34,Scene3,Off,On,8.6800,8.7800,0.1000,-0.8432,0.2071,0.4962,Culturual  Heritage
+exp_34,Scene3,Off,On,8.9000,9.0400,0.1400,-0.9901,0.0427,0.1337,Culturual  Heritage
+exp_34,Scene3,Off,On,9.4200,9.4800,0.0600,-0.9312,0.1236,0.3430,Culturual  Heritage
+exp_34,Scene3,Off,On,9.6000,9.6600,0.0600,-0.9826,-0.0159,0.1853,Others
+exp_34,Scene3,Off,On,9.8000,9.8600,0.0600,-0.9251,0.0189,-0.3793,Tamed nature
+exp_34,Scene3,Off,On,10.1000,10.2200,0.1200,-0.7949,0.0486,-0.6047,Tamed nature
+exp_34,Scene3,Off,On,10.2800,10.3600,0.0800,-0.5766,0.0593,-0.8148,Tamed nature
+exp_34,Scene3,Off,On,10.4000,10.4600,0.0600,-0.6022,0.0402,-0.7973,Tamed nature
+exp_34,Scene3,Off,On,11.1800,11.2400,0.0600,0.2669,0.0034,-0.9637,Urban
+exp_34,Scene3,Off,On,11.3000,11.4000,0.1000,0.0134,0.0195,-0.9997,Urban
+exp_34,Scene3,Off,On,11.4400,11.5000,0.0600,0.3135,0.0461,-0.9485,Urban
+exp_34,Scene3,Off,On,11.5400,11.6400,0.1000,0.0127,0.0239,-0.9996,Urban
+exp_34,Scene3,Off,On,11.6800,11.8400,0.1600,0.1067,-0.0602,-0.9925,Urban
+exp_34,Scene3,Off,On,12.1000,12.2000,0.1000,-0.2258,-0.0404,-0.9733,Urban
+exp_34,Scene3,Off,On,12.3800,12.4400,0.0600,-0.5994,-0.1154,-0.7921,Urban
+exp_34,Scene3,Off,On,12.4800,12.5400,0.0600,-0.5913,-0.1224,-0.7971,Urban
+exp_34,Scene3,Off,On,13.2600,13.3200,0.0600,-0.7965,-0.0877,-0.5982,Urban
+exp_34,Scene3,Off,On,13.6600,13.8000,0.1400,-0.6360,0.0068,-0.7717,Tamed nature
+exp_34,Scene3,Off,On,13.9800,14.0600,0.0800,-0.6879,-0.0418,-0.7246,Tamed nature
+exp_34,Scene3,Off,On,14.2200,14.3600,0.1400,-0.6700,0.0131,-0.7423,Tamed nature
+exp_34,Scene3,Off,On,14.5000,14.5600,0.0600,-0.7190,0.0314,-0.6943,Tamed nature
+exp_34,Scene3,Off,On,14.9400,15.0400,0.1000,-0.7273,-0.0126,-0.6862,Tamed nature
+exp_34,Scene3,Off,On,15.2200,15.3200,0.1000,-0.7270,-0.0149,-0.6865,Tamed nature
+exp_34,Scene3,Off,On,15.7000,15.7600,0.0600,-0.7321,-0.0152,-0.6810,Tamed nature
+exp_34,Scene3,Off,On,15.8000,15.9000,0.1000,-0.7588,-0.0190,-0.6511,Tamed nature
+exp_34,Scene3,Off,On,17.0400,17.1400,0.1000,-0.3541,0.0799,0.9318,Culturual  Heritage
+exp_34,Scene3,Off,On,17.2800,17.3600,0.0800,-0.1355,0.1396,0.9809,Culturual  Heritage
+exp_34,Scene3,Off,On,18.4200,18.5000,0.0800,0.9698,0.0565,0.2372,Culturual  Heritage
+exp_34,Scene3,Off,On,18.7000,18.7600,0.0600,0.9837,0.0226,0.1786,Urban
+exp_34,Scene3,Off,On,18.9200,19.0000,0.0800,0.9987,0.0143,0.0491,Others
+exp_34,Scene3,Off,On,19.0400,19.1000,0.0600,0.9994,-0.0111,-0.0333,Others
+exp_34,Scene3,Off,On,19.2000,19.3400,0.1400,0.9979,-0.0021,-0.0650,Urban
+exp_34,Scene3,Off,On,19.4800,19.5600,0.0800,0.9665,0.1818,0.1812,Urban
+exp_34,Scene3,Off,On,19.7000,19.7600,0.0600,0.9466,0.2068,0.2472,Culturual  Heritage
+exp_34,Scene3,Off,On,19.9200,20.0000,0.0800,0.9265,0.2144,0.3092,Culturual  Heritage
+exp_34,Scene3,Off,On,20.0400,20.1200,0.0800,0.9970,0.0330,0.0705,Urban
+exp_34,Scene3,Off,On,20.4000,20.5000,0.1000,0.8833,0.2365,0.4047,Culturual  Heritage
+exp_34,Scene3,Off,On,20.5400,20.6000,0.0600,0.9821,0.0551,0.1799,Urban
+exp_34,Scene3,Off,On,20.6400,20.7000,0.0600,0.9627,0.0897,0.2552,Culturual  Heritage
+exp_34,Scene3,Off,On,20.9000,21.0400,0.1400,0.9796,0.0708,0.1879,Urban
+exp_34,Scene3,Off,On,21.1800,21.3000,0.1200,0.8512,0.0860,0.5178,Culturual  Heritage
+exp_34,Scene3,Off,On,21.3400,21.4200,0.0800,0.8954,0.0433,0.4432,Culturual  Heritage
+exp_34,Scene3,Off,On,21.6000,21.6800,0.0800,0.9834,-0.0185,0.1805,Others
+exp_34,Scene3,Off,On,21.8400,21.9200,0.0800,0.9794,0.0457,0.1967,Culturual  Heritage
+exp_34,Scene3,Off,On,21.9600,22.0600,0.1000,0.8898,0.2072,0.4066,Culturual  Heritage
+exp_34,Scene3,Off,On,22.1600,22.3000,0.1400,0.8969,0.2168,0.3855,Culturual  Heritage
+exp_34,Scene3,Off,On,22.4200,22.5000,0.0800,0.9001,0.2229,0.3744,Culturual  Heritage
+exp_34,Scene3,Off,On,22.6200,22.7000,0.0800,0.9799,0.0485,0.1933,Culturual  Heritage
+exp_34,Scene3,Off,On,22.9600,23.0200,0.0600,0.9111,-0.0185,0.4117,Culturual  Heritage
+exp_34,Scene3,Off,On,23.1800,23.3800,0.2000,0.9733,0.0332,0.2271,Culturual  Heritage
+exp_34,Scene3,Off,On,23.4200,23.6600,0.2400,0.9823,0.0529,0.1799,Urban
+exp_34,Scene3,Off,On,23.8400,23.9200,0.0800,0.9133,0.0221,0.4067,Culturual  Heritage
+exp_34,Scene3,Off,On,24.1200,24.2200,0.1000,0.8788,0.0837,0.4698,Culturual  Heritage
+exp_34,Scene3,Off,On,24.5400,24.7600,0.2200,0.9920,0.0280,0.1228,Urban
+exp_34,Scene3,Off,On,24.8800,24.9400,0.0600,0.9844,0.0214,0.1749,Urban
+exp_34,Scene3,Off,On,25.0000,25.1200,0.1200,0.9123,0.2365,0.3345,Culturual  Heritage
+exp_34,Scene3,Off,On,25.6400,25.7000,0.0600,0.9359,0.3130,0.1616,Urban
+exp_34,Scene3,Off,On,25.8600,25.9800,0.1200,0.9859,0.0651,0.1540,Others
+exp_34,Scene3,Off,On,26.1800,26.4000,0.2200,0.9779,0.0889,0.1890,Culturual  Heritage
+exp_34,Scene3,Off,On,26.5000,26.7200,0.2200,0.9695,0.0946,0.2262,Culturual  Heritage
+exp_34,Scene3,Off,On,26.8600,27.0400,0.1800,0.9594,0.1244,0.2533,Culturual  Heritage
+exp_34,Scene3,Off,On,27.0800,27.2000,0.1200,0.9350,0.1365,0.3272,Culturual  Heritage
+exp_34,Scene3,Off,On,27.3400,27.4200,0.0800,0.9446,0.1342,0.2995,Culturual  Heritage
+exp_34,Scene3,Off,On,27.5800,27.7000,0.1200,0.9390,0.3159,0.1359,Urban
+exp_34,Scene3,Off,On,27.7800,27.9000,0.1200,0.9412,0.3124,0.1285,Urban
+exp_34,Scene3,Off,On,28.1000,28.2400,0.1400,0.9420,0.3106,0.1271,Urban
+exp_34,Scene3,Off,On,28.3600,28.4600,0.1000,0.9387,0.3186,0.1319,Urban
+exp_34,Scene3,Off,On,28.6200,28.7000,0.0800,0.9723,0.0886,0.2164,Culturual  Heritage
+exp_34,Scene3,Off,On,28.7600,28.9200,0.1600,0.9378,0.3144,0.1473,Urban
+exp_34,Scene3,Off,On,29.1800,29.2600,0.0800,0.9182,0.0642,0.3908,Culturual  Heritage
+exp_34,Scene3,Off,On,29.3000,29.3800,0.0800,0.9109,0.0755,0.4057,Culturual  Heritage
+exp_34,Scene3,Off,On,29.4800,29.7000,0.2200,0.8219,0.0139,0.5694,Culturual  Heritage
+exp_34,Scene3,Off,On,29.8200,29.9600,0.1400,0.9612,0.0218,0.2751,Culturual  Heritage
+exp_34,Scene3,Off,On,30.0000,30.5800,0.5800,0.9641,0.0174,0.2649,Culturual  Heritage
+exp_34,Scene3,Off,On,30.7400,30.9400,0.2000,0.9701,0.0795,0.2293,Culturual  Heritage
+exp_34,Scene3,Off,On,31.0600,31.1400,0.0800,0.9613,0.0957,0.2584,Culturual  Heritage
+exp_34,Scene3,Off,On,31.1800,31.2400,0.0600,0.9608,0.0966,0.2599,Culturual  Heritage
+exp_34,Scene3,Off,On,31.2800,31.3400,0.0600,0.9829,0.0383,0.1803,Culturual  Heritage
+exp_34,Scene3,Off,On,31.4800,31.5400,0.0600,0.9610,0.1088,0.2543,Culturual  Heritage
+exp_34,Scene3,Off,On,31.7200,31.8400,0.1200,0.9461,0.2782,0.1659,Urban
+exp_34,Scene3,Off,On,31.8800,31.9400,0.0600,0.9826,0.0616,0.1750,Urban
+exp_34,Scene3,Off,On,31.9800,32.1400,0.1600,0.9658,0.1144,0.2326,Culturual  Heritage
+exp_34,Scene3,Off,On,32.2800,32.4000,0.1200,0.9538,0.1034,0.2821,Culturual  Heritage
+exp_34,Scene3,Off,On,32.5000,32.6000,0.1000,0.9515,0.1136,0.2859,Culturual  Heritage
+exp_34,Scene3,Off,On,32.9000,33.0200,0.1200,0.9468,0.2409,0.2135,Culturual  Heritage
+exp_34,Scene3,Off,On,33.1800,33.2800,0.1000,0.9346,0.2580,0.2450,Culturual  Heritage
+exp_34,Scene3,Off,On,33.3200,33.3800,0.0600,0.9483,0.1614,0.2732,Culturual  Heritage
+exp_34,Scene3,Off,On,33.4200,33.5600,0.1400,0.9219,0.2877,0.2597,Culturual  Heritage
+exp_34,Scene3,Off,On,33.8200,33.9400,0.1200,0.9138,0.2996,0.2741,Culturual  Heritage
+exp_34,Scene3,Off,On,34.0600,34.2000,0.1400,0.9099,0.2936,0.2930,Culturual  Heritage
+exp_34,Scene3,Off,On,34.3600,34.5000,0.1400,0.9109,0.3087,0.2737,Culturual  Heritage
+exp_34,Scene3,Off,On,34.6400,34.7000,0.0600,0.7947,0.3228,0.5141,Culturual  Heritage
+exp_34,Scene3,Off,On,34.8200,34.8800,0.0600,0.7277,0.3130,0.6103,Culturual  Heritage
+exp_34,Scene3,Off,On,34.9600,35.2000,0.2400,0.6823,0.2934,0.6696,Culturual  Heritage
+exp_34,Scene3,Off,On,35.2400,35.3600,0.1200,0.9190,0.3215,0.2281,Culturual  Heritage
+exp_34,Scene3,Off,On,35.4200,35.4800,0.0600,0.9398,0.1647,0.2993,Culturual  Heritage
+exp_34,Scene3,Off,On,35.5200,36.0600,0.5400,0.9602,0.1268,0.2488,Culturual  Heritage
+exp_34,Scene3,Off,On,36.1000,36.3200,0.2200,0.9510,0.1286,0.2811,Culturual  Heritage
+exp_34,Scene3,Off,On,36.4400,36.6400,0.2000,0.9473,0.0772,0.3110,Culturual  Heritage
+exp_34,Scene3,Off,On,36.6800,36.8000,0.1200,0.9436,0.0818,0.3209,Culturual  Heritage
+exp_34,Scene3,Off,On,36.9400,37.0800,0.1400,0.9131,0.0276,0.4069,Culturual  Heritage
+exp_34,Scene3,Off,On,37.1200,37.2000,0.0800,0.8261,-0.0081,0.5634,Culturual  Heritage
+exp_34,Scene3,Off,On,37.2400,37.3200,0.0800,0.8272,0.0117,0.5617,Culturual  Heritage
+exp_34,Scene3,Off,On,37.4000,37.5400,0.1400,0.7855,0.0213,0.6184,Culturual  Heritage
+exp_34,Scene3,Off,On,37.5800,37.6800,0.1000,0.9141,0.3034,0.2692,Culturual  Heritage
+exp_34,Scene3,Off,On,37.8200,37.9000,0.0800,0.9099,0.2772,0.3086,Culturual  Heritage
+exp_34,Scene3,Off,On,38.0600,38.1800,0.1200,0.9120,0.2963,0.2838,Culturual  Heritage
+exp_34,Scene3,Off,On,38.7000,38.8000,0.1000,0.8521,0.4309,0.2970,Culturual  Heritage
+exp_34,Scene3,Off,On,38.8400,38.9200,0.0800,0.7884,0.5291,0.3137,Culturual  Heritage
+exp_34,Scene3,Off,On,39.0400,39.1600,0.1200,0.7702,0.5603,0.3047,Culturual  Heritage
+exp_34,Scene3,Off,On,39.2200,39.2800,0.0600,0.6100,0.5747,0.5456,Culturual  Heritage
+exp_34,Scene3,Off,On,39.5200,39.6200,0.1000,0.5621,0.5453,0.6219,Culturual  Heritage
+exp_34,Scene3,Off,On,39.6600,39.7600,0.1000,0.7641,0.5664,0.3088,Culturual  Heritage
+exp_34,Scene3,Off,On,39.8200,39.8800,0.0600,0.6234,0.4965,0.6040,Culturual  Heritage
+exp_34,Scene3,Off,On,40.2000,40.4000,0.2000,0.9391,0.2171,0.2663,Culturual  Heritage
+exp_34,Scene3,Off,On,40.4400,40.7200,0.2800,0.9481,0.2183,0.2310,Culturual  Heritage
+exp_34,Scene3,Off,On,40.8600,40.9800,0.1200,0.9309,0.2746,0.2407,Culturual  Heritage
+exp_34,Scene3,Off,On,41.0200,41.1400,0.1200,0.8062,0.5141,0.2928,Culturual  Heritage
+exp_34,Scene3,Off,On,41.1800,41.3600,0.1800,0.8069,0.5116,0.2954,Culturual  Heritage
+exp_34,Scene3,Off,On,41.5200,41.6600,0.1400,0.9315,0.3036,0.2005,Culturual  Heritage
+exp_34,Scene3,Off,On,41.8800,42.0600,0.1800,0.8857,0.3536,0.3008,Culturual  Heritage
+exp_34,Scene3,Off,On,42.3200,42.4200,0.1000,0.8052,0.4001,0.4376,Culturual  Heritage
+exp_34,Scene3,Off,On,42.4600,42.5600,0.1000,0.7950,0.4927,0.3539,Culturual  Heritage
+exp_34,Scene3,Off,On,42.6200,42.7600,0.1400,0.7930,0.4921,0.3592,Culturual  Heritage
+exp_34,Scene3,Off,On,42.8200,42.8800,0.0600,0.8559,0.3562,0.3748,Culturual  Heritage
+exp_34,Scene3,Off,On,42.9200,43.0800,0.1600,0.8025,0.4160,0.4276,Culturual  Heritage
+exp_34,Scene3,Off,On,43.1200,43.2200,0.1000,0.8130,0.3922,0.4303,Culturual  Heritage
+exp_34,Scene3,Off,On,43.3200,43.4200,0.1000,0.6077,0.5034,0.6142,Culturual  Heritage
+exp_34,Scene3,Off,On,43.4600,43.5400,0.0800,0.6092,0.5222,0.5967,Culturual  Heritage
+exp_34,Scene3,Off,On,43.6800,43.7400,0.0600,0.5426,0.4351,0.7185,Culturual  Heritage
+exp_34,Scene3,Off,On,43.7800,43.8800,0.1000,0.7422,0.4830,0.4646,Culturual  Heritage
+exp_34,Scene3,Off,On,43.9200,44.0200,0.1000,0.5536,0.4558,0.6970,Culturual  Heritage
+exp_34,Scene3,Off,On,44.1000,44.2400,0.1400,0.5153,0.5535,0.6543,Culturual  Heritage
+exp_34,Scene3,Off,On,44.3000,44.4000,0.1000,0.7475,0.4627,0.4766,Culturual  Heritage
+exp_34,Scene3,Off,On,44.4800,44.5800,0.1000,0.5080,0.5498,0.6631,Culturual  Heritage
+exp_34,Scene3,Off,On,44.6200,44.7000,0.0800,0.7153,0.4646,0.5219,Culturual  Heritage
+exp_34,Scene3,Off,On,44.7600,44.9000,0.1400,0.4746,0.5724,0.6686,Culturual  Heritage
+exp_34,Scene3,Off,On,45.3800,45.4400,0.0600,0.4652,0.5099,0.7236,Culturual  Heritage
+exp_34,Scene3,Off,On,45.4800,45.8200,0.3400,0.4422,0.5082,0.7391,Culturual  Heritage
+exp_34,Scene3,Off,On,46.1600,46.2200,0.0600,0.5212,0.4955,0.6948,Culturual  Heritage
+exp_34,Scene3,Off,On,46.6200,46.7000,0.0800,0.7983,0.2733,0.5367,Culturual  Heritage
+exp_34,Scene3,Off,On,47.0200,47.0800,0.0600,0.8926,0.1554,0.4233,Culturual  Heritage
+exp_34,Scene3,Off,On,47.2000,47.2800,0.0800,0.9656,-0.0131,0.2597,Culturual  Heritage
+exp_34,Scene3,Off,On,47.3200,47.3800,0.0600,0.9614,0.0146,0.2747,Culturual  Heritage
+exp_34,Scene3,Off,On,47.4200,47.5200,0.1000,0.9560,0.0404,0.2906,Culturual  Heritage
+exp_34,Scene3,Off,On,47.5600,47.7800,0.2200,0.9652,0.0529,0.2559,Culturual  Heritage
+exp_34,Scene3,Off,On,47.8200,47.9000,0.0800,0.9715,0.0395,0.2338,Culturual  Heritage
+exp_34,Scene3,Off,On,47.9400,48.0000,0.0600,0.9674,0.0498,0.2482,Culturual  Heritage
+exp_34,Scene3,Off,On,48.1800,48.2800,0.1000,0.8897,0.2463,0.3843,Culturual  Heritage
+exp_34,Scene3,Off,On,48.3600,48.4800,0.1200,0.8864,0.2415,0.3950,Culturual  Heritage
+exp_34,Scene3,Off,On,48.5400,48.6800,0.1400,0.8818,0.2436,0.4039,Culturual  Heritage
+exp_34,Scene3,Off,On,48.7200,48.7800,0.0600,0.9338,0.0682,0.3513,Culturual  Heritage
+exp_34,Scene3,Off,On,48.8400,48.9000,0.0600,0.8988,0.1284,0.4191,Culturual  Heritage
+exp_34,Scene3,Off,On,49.2400,49.3200,0.0800,0.7973,0.3066,0.5199,Culturual  Heritage
+exp_34,Scene3,Off,On,49.4600,49.5600,0.1000,0.7703,0.3225,0.5502,Culturual  Heritage
+exp_34,Scene3,Off,On,49.6600,49.7600,0.1000,0.7475,0.3441,0.5682,Culturual  Heritage
+exp_34,Scene3,Off,On,49.9000,49.9600,0.0600,0.7058,0.3593,0.6105,Culturual  Heritage
+exp_34,Scene3,Off,On,50.4200,50.4800,0.0600,0.0193,0.1496,0.9886,Culturual  Heritage
+exp_34,Scene3,Off,On,50.6200,50.6800,0.0600,-0.0088,0.1138,0.9935,Culturual  Heritage
+exp_34,Scene3,Off,On,51.1600,51.2200,0.0600,-0.3745,0.4472,0.8123,Culturual  Heritage
+exp_34,Scene3,Off,On,51.7000,51.8800,0.1800,-0.8331,0.0773,0.5477,Culturual  Heritage
+exp_34,Scene3,Off,On,52.0000,52.0600,0.0600,-0.9250,-0.0330,0.3785,Culturual  Heritage
+exp_34,Scene3,Off,On,52.2000,52.2600,0.0600,-0.9631,-0.0742,0.2588,Others
+exp_34,Scene3,Off,On,52.3000,52.3800,0.0800,-0.9827,-0.0102,0.1849,Others
+exp_34,Scene3,Off,On,52.4200,52.4800,0.0600,-0.9801,-0.0943,0.1747,Others
+exp_34,Scene3,Off,On,52.5200,52.5800,0.0600,-0.9808,-0.1172,0.1556,Others
+exp_34,Scene3,Off,On,52.8600,52.9200,0.0600,-0.8341,0.2540,0.4896,Culturual  Heritage
+exp_34,Scene3,Off,On,53.0600,53.1600,0.1000,-0.8632,0.2224,0.4532,Culturual  Heritage
+exp_34,Scene3,Off,On,53.3400,53.4000,0.0600,-0.9902,-0.0101,0.1395,Others
+exp_34,Scene3,Off,On,53.4400,53.9400,0.5000,-0.9982,-0.0105,0.0584,Others
+exp_34,Scene3,Off,On,53.9800,54.0600,0.0800,-0.9997,0.0254,-0.0048,Others
+exp_34,Scene3,Off,On,54.3600,54.4200,0.0600,-0.8822,-0.0248,-0.4702,Urban
+exp_34,Scene3,Off,On,55.1400,55.2000,0.0600,0.1469,0.0531,-0.9877,Urban
+exp_34,Scene3,Off,On,55.2800,55.3400,0.0600,-0.1706,0.0558,-0.9838,Tamed nature
+exp_34,Scene3,Off,On,55.4400,55.5200,0.0800,0.0564,0.0353,-0.9978,Urban
+exp_34,Scene3,Off,On,55.6400,55.7400,0.1000,0.1234,-0.0380,-0.9916,Urban
+exp_34,Scene3,Off,On,55.7800,55.8400,0.0600,0.1893,0.0097,-0.9819,Urban
+exp_34,Scene3,Off,On,57.0200,57.0800,0.0600,-0.7715,0.3171,0.5515,Culturual  Heritage
+exp_34,Scene3,Off,On,57.1800,57.2600,0.0800,-0.9447,0.2147,0.2477,Culturual  Heritage
+exp_34,Scene3,Off,On,57.3800,57.4600,0.0800,-0.9847,0.0601,0.1638,Culturual  Heritage
+exp_34,Scene3,Off,On,57.6200,57.7000,0.0800,-0.9954,-0.0111,0.0947,Others
+exp_34,Scene3,Off,On,57.7400,57.8000,0.0600,-0.9962,0.0260,0.0837,Urban
+exp_34,Scene3,Off,On,57.8600,57.9200,0.0600,-0.9102,0.2030,0.3611,Culturual  Heritage
+exp_34,Scene3,Off,On,59.4200,59.5200,0.1000,0.9620,0.1219,0.2443,Culturual  Heritage
+exp_34,Scene3,Off,On,60.1000,60.1600,0.0600,0.5854,0.0333,0.8101,Culturual  Heritage
+exp_34,Scene3,Off,On,60.2000,60.2600,0.0600,0.5741,0.0616,0.8164,Culturual  Heritage
+exp_34,Scene3,Off,On,60.3000,60.3600,0.0600,0.6005,0.0312,0.7990,Culturual  Heritage
+exp_34,Scene3,Off,On,60.4000,60.4800,0.0800,0.7304,0.3212,0.6028,Culturual  Heritage
+exp_34,Scene3,Off,On,60.8000,60.8600,0.0600,0.6073,0.0779,0.7906,Culturual  Heritage
+exp_34,Scene3,Off,On,60.9000,60.9600,0.0600,0.5817,0.0970,0.8076,Culturual  Heritage
+exp_34,Scene3,Off,On,61.0000,61.0800,0.0800,0.5982,0.0741,0.7979,Culturual  Heritage
+exp_34,Scene3,Off,On,61.1200,61.2200,0.1000,0.6237,0.0472,0.7803,Culturual  Heritage
+exp_34,Scene3,Off,On,61.2600,61.3200,0.0600,0.8142,0.3255,0.4808,Culturual  Heritage
+exp_34,Scene3,Off,On,61.4800,61.6200,0.1400,0.9777,0.0439,0.2052,Culturual  Heritage
+exp_34,Scene3,Off,On,61.6600,61.7400,0.0800,0.9764,0.0450,0.2111,Culturual  Heritage
+exp_34,Scene3,Off,On,61.8200,61.9000,0.0800,0.8581,0.3015,0.4155,Culturual  Heritage
+exp_34,Scene3,Off,On,62.0400,62.1600,0.1200,0.9735,0.0939,0.2087,Culturual  Heritage
+exp_34,Scene3,Off,On,62.2200,62.3200,0.1000,0.8547,0.3188,0.4097,Culturual  Heritage
+exp_34,Scene3,Off,On,62.5600,62.6200,0.0600,0.9918,0.1249,0.0266,Urban
+exp_34,Scene3,Off,On,62.8600,62.9600,0.1000,0.9900,0.0992,-0.1007,Urban
+exp_34,Scene3,Off,On,63.0000,63.1400,0.1400,0.9913,0.1048,-0.0800,Urban
+exp_34,Scene3,Off,On,63.2000,63.3400,0.1400,0.9981,0.0382,0.0486,Urban
+exp_34,Scene3,Off,On,63.5000,63.5600,0.0600,0.9719,0.0510,0.2296,Culturual  Heritage
+exp_34,Scene3,Off,On,63.8000,63.8600,0.0600,0.7326,0.3526,0.5821,Culturual  Heritage
+exp_34,Scene3,Off,On,64.0800,64.1400,0.0600,0.3259,0.2245,0.9184,Culturual  Heritage
+exp_34,Scene3,Off,On,64.7000,64.7600,0.0600,-0.8506,0.0768,0.5202,Culturual  Heritage
+exp_34,Scene3,Off,On,64.9800,65.0400,0.0600,-0.9820,0.0430,0.1841,Culturual  Heritage
+exp_34,Scene3,Off,On,65.1600,65.2400,0.0800,-0.9540,0.0190,0.2993,Culturual  Heritage
+exp_34,Scene3,Off,On,66.1200,66.1800,0.0600,-0.8092,0.2982,0.5063,Culturual  Heritage
+exp_34,Scene3,Off,On,66.2200,66.3200,0.1000,-0.8798,0.3078,0.3621,Culturual  Heritage
+exp_34,Scene3,Off,On,66.5200,66.6000,0.0800,-0.8990,0.3283,0.2898,Culturual  Heritage
+exp_34,Scene3,Off,On,66.6400,66.7000,0.0600,-0.8859,0.2738,0.3745,Culturual  Heritage
+exp_34,Scene3,Off,On,66.7800,66.8400,0.0600,-0.8888,0.2702,0.3702,Culturual  Heritage
+exp_34,Scene3,Off,On,67.3200,67.3800,0.0600,-0.4502,0.4498,0.7714,Culturual  Heritage
+exp_34,Scene3,Off,On,67.5000,67.5800,0.0800,-0.4567,0.5645,0.6876,Culturual  Heritage
+exp_34,Scene3,Off,On,67.9000,67.9600,0.0600,-0.0095,0.7100,0.7041,Culturual  Heritage
+exp_34,Scene3,Off,On,68.0000,68.0600,0.0600,-0.0064,0.6928,0.7211,Culturual  Heritage
+exp_34,Scene3,Off,On,68.1000,68.1800,0.0800,0.0086,0.7180,0.6960,Culturual  Heritage
+exp_34,Scene3,Off,On,68.2800,68.3600,0.0800,-0.2163,0.4506,0.8661,Culturual  Heritage
+exp_34,Scene3,Off,On,68.5000,68.5600,0.0600,-0.0377,0.1674,0.9852,Culturual  Heritage
+exp_34,Scene3,Off,On,69.7200,69.8000,0.0800,-0.9158,0.2870,0.2810,Culturual  Heritage
+exp_34,Scene3,Off,On,69.9000,69.9600,0.0600,-0.9331,0.2613,0.2471,Culturual  Heritage
+exp_34,Scene3,Off,On,70.1000,70.1600,0.0600,-0.9655,-0.0383,0.2575,Others
+exp_34,Scene3,Off,On,70.3600,70.4400,0.0800,-0.9571,0.1633,0.2393,Culturual  Heritage
+exp_34,Scene3,Off,On,70.6000,70.6800,0.0800,-0.9584,0.1260,0.2560,Culturual  Heritage
+exp_34,Scene3,Off,On,70.9600,71.0400,0.0800,-0.9712,0.1406,0.1925,Culturual  Heritage
+exp_34,Scene3,Off,On,71.2000,71.2600,0.0600,-0.9668,0.1301,0.2199,Culturual  Heritage
+exp_34,Scene3,Off,On,71.4200,71.4800,0.0600,-0.9517,0.1419,0.2724,Culturual  Heritage
+exp_34,Scene3,Off,On,71.6000,71.6800,0.0800,-0.7994,0.0646,0.5973,Culturual  Heritage
+exp_34,Scene3,Off,On,71.7200,71.8200,0.1000,-0.9130,0.1340,0.3852,Culturual  Heritage
+exp_34,Scene3,Off,On,71.9600,72.0400,0.0800,-0.9130,0.1196,0.3901,Culturual  Heritage
+exp_34,Scene3,Off,On,72.1000,72.1600,0.0600,-0.9953,-0.0299,0.0923,Others
+exp_34,Scene3,Off,On,72.2800,72.3600,0.0800,-0.9984,0.0054,0.0570,Others
+exp_34,Scene3,Off,On,72.4000,72.4800,0.0800,-0.9524,0.0816,0.2936,Culturual  Heritage
+exp_34,Scene3,Off,On,72.6800,72.8000,0.1200,-0.9846,-0.0496,0.1675,Others
+exp_34,Scene3,Off,On,72.9000,73.0000,0.1000,-0.9846,0.0857,0.1521,Culturual  Heritage
+exp_34,Scene3,Off,On,73.1600,73.3000,0.1400,-0.9880,-0.0211,0.1530,Others
+exp_34,Scene3,Off,On,73.4400,73.5000,0.0600,-0.9888,0.0717,0.1306,Culturual  Heritage
+exp_34,Scene3,Off,On,73.5400,73.6000,0.0600,-0.9788,0.0355,0.2015,Culturual  Heritage
+exp_34,Scene3,Off,On,73.7600,73.8600,0.1000,-0.8594,0.0269,0.5106,Culturual  Heritage
+exp_34,Scene3,Off,On,74.0000,74.0600,0.0600,-0.7986,0.1067,0.5924,Culturual  Heritage
+exp_34,Scene3,Off,On,74.6400,74.7000,0.0600,-0.9386,0.0405,0.3427,Culturual  Heritage
+exp_34,Scene3,Off,On,75.0200,75.0800,0.0600,-0.9622,0.0891,0.2573,Culturual  Heritage
+exp_34,Scene3,Off,On,75.3200,75.4000,0.0800,-0.9885,-0.0408,0.1458,Others
+exp_34,Scene3,Off,On,75.8000,75.9400,0.1400,-0.9895,0.0536,0.1339,Culturual  Heritage
+exp_34,Scene3,Off,On,76.1200,76.2000,0.0800,-0.9986,-0.0463,0.0249,Others
+exp_34,Scene3,Off,On,76.3600,76.4200,0.0600,-0.9978,0.0026,-0.0660,Urban
+exp_34,Scene3,Off,On,76.6400,76.7800,0.1400,-0.9987,0.0493,0.0098,Urban
+exp_34,Scene3,Off,On,76.8400,76.9200,0.0800,-0.9994,0.0067,0.0349,Others
+exp_34,Scene3,Off,On,77.0600,77.1200,0.0600,-0.9488,-0.0347,0.3139,Others
+exp_34,Scene3,Off,On,77.2600,77.4600,0.2000,-0.9932,0.0671,0.0950,Culturual  Heritage
+exp_34,Scene3,Off,On,77.6600,77.7200,0.0600,-0.9696,-0.0159,0.2442,Others
+exp_34,Scene3,Off,On,77.7600,77.9000,0.1400,-0.9948,0.0538,0.0869,Urban
+exp_34,Scene3,Off,On,78.2000,78.2800,0.0800,-0.9969,-0.0131,0.0780,Others
+exp_34,Scene3,Off,On,78.3200,78.3800,0.0600,-0.9960,-0.0112,0.0886,Others
+exp_34,Scene3,Off,On,78.4200,78.4800,0.0600,-0.9924,-0.0353,0.1183,Others
+exp_34,Scene3,Off,On,78.5400,78.6400,0.1000,-0.9954,0.0460,0.0842,Urban
+exp_34,Scene3,Off,On,78.7600,78.9800,0.2200,-0.9090,-0.3249,-0.2609,Others
+exp_34,Scene3,Off,On,79.1400,79.2600,0.1200,-0.8383,-0.5293,-0.1308,Others
+exp_34,Scene3,Off,On,79.3800,79.4800,0.1000,-0.8578,-0.4994,-0.1213,Others
+exp_34,Scene3,Off,On,79.5200,79.6600,0.1400,-0.9993,0.0318,0.0189,Urban
+exp_34,Scene3,Off,On,79.7200,79.8000,0.0800,-0.9994,-0.0218,0.0254,Others
+exp_34,Scene3,Off,On,80.1600,80.2400,0.0800,-0.9891,0.0663,0.1312,Culturual  Heritage
+exp_34,Scene3,Off,On,80.4400,80.5200,0.0800,-0.7454,0.0720,0.6627,Culturual  Heritage
+exp_34,Scene3,Off,On,81.0000,81.0800,0.0800,0.0012,0.0143,0.9999,Culturual  Heritage
+exp_34,Scene3,Off,On,81.1200,81.2000,0.0800,0.0032,0.0209,0.9998,Culturual  Heritage
+exp_34,Scene3,Off,On,81.2400,81.3200,0.0800,0.0495,0.1015,0.9936,Culturual  Heritage
+exp_34,Scene3,Off,On,81.7400,81.8000,0.0600,-0.4049,-0.0577,0.9126,Culturual  Heritage
+exp_34,Scene3,Off,On,81.8400,81.9200,0.0800,-0.4193,-0.0337,0.9072,Culturual  Heritage
+exp_34,Scene3,Off,On,81.9800,82.0400,0.0600,-0.5043,0.0083,0.8635,Culturual  Heritage
+exp_34,Scene3,Off,On,82.2400,82.3000,0.0600,-0.5035,-0.0869,0.8596,Culturual  Heritage
+exp_34,Scene3,Off,On,82.3600,82.4600,0.1000,-0.4431,0.0726,0.8935,Culturual  Heritage
+exp_34,Scene3,Off,On,82.7600,82.8200,0.0600,-0.4980,-0.0517,0.8656,Culturual  Heritage
+exp_34,Scene3,Off,On,83.3800,83.4400,0.0600,-0.6089,0.0801,0.7892,Culturual  Heritage
+exp_34,Scene3,Off,On,83.4800,83.5400,0.0600,-0.5779,0.0861,0.8116,Culturual  Heritage
+exp_34,Scene3,Off,On,83.7400,83.9000,0.1600,-0.5089,-0.0124,0.8607,Culturual  Heritage
+exp_34,Scene3,Off,On,83.9400,84.0200,0.0800,-0.5549,0.0038,0.8319,Culturual  Heritage
+exp_34,Scene3,Off,On,84.1200,84.3000,0.1800,-0.1194,0.0805,0.9896,Culturual  Heritage
+exp_34,Scene3,Off,On,84.3400,84.5200,0.1800,-0.0094,0.0492,0.9987,Culturual  Heritage
+exp_34,Scene3,Off,On,84.5800,84.7200,0.1400,-0.5218,0.0701,0.8502,Culturual  Heritage
+exp_34,Scene3,Off,On,84.7600,84.8200,0.0600,-0.3411,-0.0262,0.9397,Culturual  Heritage
+exp_34,Scene3,Off,On,84.9000,85.0200,0.1200,-0.5179,0.0660,0.8529,Culturual  Heritage
+exp_34,Scene3,Off,On,85.1200,85.1800,0.0600,-0.5414,-0.0006,0.8407,Culturual  Heritage
+exp_34,Scene3,Off,On,85.2600,85.3400,0.0800,-0.6682,-0.0678,0.7409,Culturual  Heritage
+exp_34,Scene3,Off,On,85.8800,85.9400,0.0600,-0.9898,-0.0429,0.1361,Others
+exp_34,Scene3,Off,On,86.3400,86.4000,0.0600,-0.9967,0.0641,0.0500,Urban
+exp_34,Scene3,Off,On,86.8000,86.8600,0.0600,-0.9093,0.1314,0.3948,Culturual  Heritage
+exp_34,Scene3,Off,On,87.0400,87.1600,0.1200,-0.8000,0.2779,0.5317,Culturual  Heritage
+exp_34,Scene3,Off,On,87.3400,87.4200,0.0800,-0.7183,0.3878,0.5776,Culturual  Heritage
+exp_34,Scene3,Off,On,87.5800,87.6800,0.1000,-0.4834,0.4588,0.7455,Culturual  Heritage
+exp_34,Scene3,Off,On,88.1800,88.3200,0.1400,-0.0111,0.7062,0.7079,Culturual  Heritage
+exp_34,Scene3,Off,On,88.3600,88.5600,0.2000,0.0102,0.7241,0.6896,Culturual  Heritage
+exp_34,Scene3,Off,On,88.7000,88.7600,0.0600,0.0743,0.6821,0.7275,Culturual  Heritage
+exp_34,Scene3,Off,On,88.9800,89.0600,0.0800,-0.2016,0.8468,0.4922,Culturual  Heritage
+exp_34,Scene3,Off,On,89.1000,89.2000,0.1000,-0.2910,0.8625,0.4140,Culturual  Heritage
+exp_34,Scene3,Off,On,89.2800,89.4000,0.1200,-0.3077,0.8829,0.3547,Culturual  Heritage
+exp_34,Scene3,Off,On,89.4400,89.5400,0.1000,-0.2829,0.8905,0.3562,Culturual  Heritage
+exp_34,Scene3,Off,On,89.5800,89.6400,0.0600,-0.2023,0.7259,0.6574,Culturual  Heritage
+exp_34,Scene3,Off,On,89.7000,89.7600,0.0600,-0.4405,0.7093,0.5503,Culturual  Heritage

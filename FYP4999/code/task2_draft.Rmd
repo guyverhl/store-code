@@ -1,0 +1,238 @@
+---
+title: "fyp4999"
+author: "Chan Hou Long, Guyver"
+date: "4/25/2022"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# Loading and Exploring Data
+## Libraries required
+```{r include=FALSE}
+library(TraMineR)
+library(tidyverse)
+library(igraph)
+library(LagSequential)
+library(RColorBrewer)
+```
+
+## Inport data
+```{r}
+setwd("~/Documents/HKU/FYP4999/code")
+df <- read_csv("rawT.csv")
+```
+
+## Selection useful columns
+```{r}
+seq = select(df,c("Participant","heritage","Text on-off", "Audio on-off", "ROI"))
+```
+
+# Split dataframe based on with & w/out audio (also text)
+Pair 1: baseline (A) vs. audio (C)
+Pair 2: text (B) vs. text+audio (D)
+```{r}
+textDf <- seq[(seq['Audio on-off']=='Off' & seq['Text on-off']=='On'),]
+audioDf <- seq[(seq['Audio on-off']=='On' & seq['Text on-off']=='Off'),]
+baselineDf <- seq[(seq['Audio on-off']=='Off' & seq['Text on-off']=='Off'),]
+audioTextDf <- seq[(seq['Audio on-off']=='On' & seq['Text on-off']=='On'),]
+```
+
+## Create two ROIs per cell
+```{r}
+combineRow <- function(x) {
+  comBdf <- cbind(x[1:(nrow(x)-1),5], x[2:nrow(x),5])
+  comBdf$sequence <- paste0(comBdf[,1],'->',comBdf[,2] )
+  list_df <- list(x, comBdf['sequence'])
+  n_r <- seq_len(max(sapply(list_df, nrow)))
+  result <- do.call(cbind, lapply(list_df, `[`, n_r, ))
+  colnames(result)[6] <- "sequence"
+  result$sequence <- c(NA, head(result['sequence'], dim(result)[1] - 1)[[1]])
+  for (row in 2:nrow(result)){
+    if((result$Participant[row] != result$Participant[row-1]) || 
+       (result$heritage[row] != result$heritage[row-1])) {
+        result$sequence[row] = NA
+        }
+  }
+  return(result)
+}
+
+
+textDfw2 <- combineRow(textDf)
+audioDfw2 <- combineRow(audioDf)
+baselineDfw2 <- combineRow(baselineDf)
+audioTextDfw2 <- combineRow(audioTextDf)
+
+```
+
+## Create t1 intermediate table
+```{r}
+# Combine 4 conditions tgt
+seqW2 <- rbind(textDfw2, audioDfw2, baselineDfw2, audioTextDfw2)
+
+# Create condition, start_grp, end_grp columns
+seqW2 <- seqW2 %>%
+  mutate(condition = if_else((seqW2['Audio on-off']=='Off' & seqW2['Text on-off']=='On'), "text", 
+                             if_else((seqW2['Audio on-off']=='On' & seqW2['Text on-off']=='Off'), "audio",
+                                     if_else((seqW2['Audio on-off']=='Off' & seqW2['Text on-off']=='Off'),"baseline", "text+audio")))) %>% 
+  mutate(start_grp = if_else(grepl("Culturual  Heritage->", sequence, fixed=TRUE) == TRUE, "Culturual  Heritage->",
+                             if_else(grepl("Text->", sequence, fixed=TRUE) == TRUE, "Text->",
+                                     if_else(grepl("Others->", sequence, fixed=TRUE) == TRUE, "Others->",
+                                             if_else(grepl("Nature->", sequence, fixed=TRUE) == TRUE, "Nature->", 
+                                                     if_else(grepl("Urban->", sequence, fixed=TRUE) == TRUE, "Urban->", "Tamed nature->")))))) %>% 
+  mutate(end_grp = if_else(grepl("->Culturual  Heritage", sequence, fixed=TRUE) == TRUE, "->Culturual  Heritage",
+                             if_else(grepl("->Text", sequence, fixed=TRUE) == TRUE, "->Text",
+                                     if_else(grepl("->Others", sequence, fixed=TRUE) == TRUE, "->Others",
+                                             if_else(grepl("->Nature", sequence, fixed=TRUE) == TRUE, "->Nature", 
+                                                     if_else(grepl("->Urban", sequence, fixed=TRUE) == TRUE, "->Urban", "->Tamed nature")))))) %>% 
+  relocate(condition) %>% na.omit(seqW2)
+
+# cal total of events under each conditions
+# t0_tot <- summarize(group_by(seqW2, condition),
+#                   total_event_sequence=n())
+# t0_start <- summarize(group_by(seqW2, condition, start_grp),
+#                   total_start_event_sequence=n())
+# t0_end <- summarize(group_by(seqW2, condition, end_grp),
+#                   total_end_event_sequence=n())
+t0_seq <- summarize(group_by(seqW2, condition, start_grp, end_grp),
+                    total_sequence_matrix=n())
+
+```
+
+```{r}
+mat_freq <- function(x) {
+  mat <- t0_seq[(t0_seq['condition']==x),]
+  mat <- subset(mat, select = -condition )
+  
+  a <- spread(mat, end_grp, total_sequence_matrix)
+  a <- subset(a, select = -start_grp )
+  a <- as.matrix(a)
+
+  tempList <- if(x == "audio" || x == "baseline") {
+    c("Culturual Heritage","Nature", "Others", "Tamed nature","Urban")
+    } else {
+    c("Culturual Heritage","Nature", "Others", "Tamed nature","Text","Urban")
+    }
+  res <- sequential(a, adjacent = 1, labels = tempList)
+  return(abs(res$z))
+}
+
+textZ <- mat_freq("text")
+baseZ <- mat_freq("baseline")
+audioZ <- mat_freq("audio")
+atZ <- mat_freq("text+audio")
+
+```
+
+# Visualize matrix
+```{r}
+set.seed(2047)
+gen_net <- function(x, y) {
+  dev.new(width=10,height=8,noRStudioGD = T)
+
+  g <- graph_from_adjacency_matrix(
+    x, mode = "directed", weighted=TRUE
+    )
+  
+  coul  <- brewer.pal(3, "Set1")
+  E(g)$color <- ifelse(edge.attributes(g)$weight > 3.3, coul[3],
+                          ifelse((edge.attributes(g)$weight <= 3.3) & (edge.attributes(g)$weight > 1.96), coul[2], coul[1]))
+  # E(g)$width <- edge.attributes(g)$weight/100*8
+  E(g)$lty <- ifelse(edge.attributes(g)$weight > 3.3, 1,
+                          ifelse((edge.attributes(g)$weight <= 3.3) & (edge.attributes(g)$weight > 1.96), 2, 3))
+  
+  V(g)$name[V(g)$name=='Culturual Heritage'] <- 'Culturual\nHeritage'
+  V(g)$name[V(g)$name=='Tamed nature'] <- 'Tamed\nnature'
+  E(g)$label <- formatC(edge.attributes(g)$weight, digits=2,format="f")
+
+  if ((grepl("Baseline", y, fixed=TRUE) == T) || (grepl("Audio", y, fixed=TRUE) == T)) {
+      for (k in 1:length(E(g)$label)) {
+        if (k%%5 == 1) {
+          E(g)$label[k] = paste(E(g)$label[k], "CH", sep="->")
+        } else if (k%%5 == 2) {
+          E(g)$label[k] = paste(E(g)$label[k], "N", sep="->")
+        } else if (k%%5 == 3) {
+          E(g)$label[k] = paste(E(g)$label[k], "O", sep="->")
+        } else if (k%%5 == 4) {
+          E(g)$label[k] = paste(E(g)$label[k], "TA", sep="->")
+        } else {
+          E(g)$label[k] = paste(E(g)$label[k], "U", sep="->")
+        }
+      }
+  } else {
+      for (k in 1:length(E(g)$label)) {
+        if (k%%6 == 1) {
+          E(g)$label[k] = paste(E(g)$label[k], "CH", sep="->")
+        } else if (k%%6 == 2) {
+          E(g)$label[k] = paste(E(g)$label[k], "N", sep="->")
+        } else if (k%%6 == 3) {
+          E(g)$label[k] = paste(E(g)$label[k], "O", sep="->")
+        } else if (k%%6 == 4) {
+          E(g)$label[k] = paste(E(g)$label[k], "TA", sep="->")
+        } else if (k%%6 == 5) {
+          E(g)$label[k] = paste(E(g)$label[k], "T", sep="->")
+        } else {
+          E(g)$label[k] = paste(E(g)$label[k], "U", sep="->")
+        }
+      }
+  }
+
+  
+  edgeCurve <- ifelse((grepl("Baseline", y, fixed=TRUE) == T) || 
+                         (grepl("Audio", y, fixed=TRUE) == T), 0.15, .05)
+  loopAngleList <- if ((grepl("Baseline", y, fixed=TRUE) == T) || 
+                         (grepl("Audio", y, fixed=TRUE) == T)) {
+    loopAngleList<- c(6.2,0,0,0,0,
+                      0,6.2,0,0,0,
+                      0,0,3.2,0,0,
+                      0,0,0,3.2,0,
+                      0,0,0,0,6.2)
+  } else {
+    loopAngleList<- c(6.2,0,0,0,0,0,
+                      0,6.2,0,0,0,0,
+                      0,0,3.2,0,0,0,
+                      0,0,0,3.2,0,0,
+                      0,0,0,0,3.2,0,
+                      0,0,0,0,0,6.2)
+  }
+
+  p <- plot(g, vertex.size = 30,
+            edge.label = E(g)$label,
+            layout=layout.circle, main=y,
+            edge.label.cex = .7,
+            edge.label.color = "black",
+            edge.arrow.size=0.5, 
+            edge.label.dist=10,
+            edge.curved=edgeCurve,
+            edge.color=E(g)$color,
+            edge.lty = E(g)$lty,
+            edge.loop.angle=loopAngleList
+            ) 
+  legend("topleft",
+         legend=c("Z>3.3","1.96<Z<=3.3","Z<=1.96"),
+         fill=c(coul[3],coul[2],coul[1]),
+         cex = .8, xpd=TRUE)
+  return(p)
+}
+
+
+
+text.g <- gen_net(textZ, "Text")
+base.g <- gen_net(baseZ, "Baseline")
+audio.g <- gen_net(audioZ, "Audio")
+at.g <- gen_net(atZ, "text+audio")
+
+```
+

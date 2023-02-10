@@ -1,0 +1,908 @@
+---
+title: "Lecture 10"
+output:
+  html_document:
+    df_print: paged
+---
+
+## SQL  in R 
+SQL is a database query language - a language designed specifically for interacting with a database. It offers syntax for extracting data, updating data, replacing data, creating data, etc. For our purposes, it will typically be used when accessing data off a server database. If the database isn't too large, you can grab the entire data set and stick it in a data.frame. However, often the data are quite large so you interact with it piecemeal via SQL
+
+There are various database implementations (SQLite, Microsoft SQL Server, PostgreSQL, etc) which are database management software that use SQL to access the data. The method of connecting with each database may differ, but they support SQL (specifically they support ANSI SQL) and often extend it in subtle ways. This means that in general, SQL written to access a SQLite database may not work to access a PostgreSQL database.
+
+Most of these differences are on more fringe operations, and standard commands tend to be equivalent.
+
+we will cover only the syntax of SQL queries, using the `sqldf` package which enables SQL queries on a data frame. We will not cover connecting to a SQL server, nor modifying an existing database, only extracting the data to analyze in R with normal methods.
+ 
+```{r}
+library(sqldf)
+sqldf('SELECT age, circumference FROM Orange WHERE Tree = 1 ORDER BY circumference ASC')
+
+data(BOD)
+sqldf('SELECT demand FROM BOD')
+sqldf('SELECT Time, demand from BOD')
+bod2 <- sqldf('SELECT * FROM BOD')
+bod2
+## To control the number of results returned, use LIMIT #.
+sqldf('SELECT * FROM iris LIMIT 5')
+
+## ORDER BY
+sqldf("SELECT * FROM Orange ORDER BY age ASC, circumference DESC LIMIT 5")
+## WHERE
+sqldf('SELECT demand FROM BOD WHERE Time < 3')
+## And/OR 
+sqldf('SELECT * FROM rock WHERE (peri > 5000 AND shape < .05) OR perm > 1000')
+## IN 
+sqldf('SELECT * FROM BOD WHERE Time IN (1,7)')
+## LIKE
+sqldf('SELECT * FROM chickwts WHERE feed LIKE "%bean" LIMIT 5')
+sqldf('SELECT * FROM chickwts WHERE feed NOT LIKE "%bean" LIMIT 5')
+## Aggregated data
+sqldf("SELECT AVG(circumference) FROM Orange")
+sqldf("SELECT tree, AVG(circumference) AS meancirc FROM Orange GROUP BY tree")
+## Counting data
+d <- data.frame(a = c(1,1,1), b = c(1,NA,NA))
+d
+sqldf("SELECT COUNT() as numrows FROM d")
+sqldf("SELECT COUNT(b) FROM d")
+```
+
+
+When working with data you must:
+
+* Figure out what you want to do.
+
+* Describe those tasks in the form of a computer program.
+
+* Execute the program.
+
+The `dplyr` package makes these steps fast and easy:
+
+* By constraining your options, it helps you think about your data manipulation 
+  challenges.
+
+* It provides simple "verbs", functions that correspond to the most common data 
+  manipulation tasks, to help you translate your thoughts into code.
+
+* It uses efficient back-ends, so you spend less time waiting for the computer.
+
+This document introduces you to `dplyr`'s basic set of tools, and shows you how to apply them to data frames. `dplyr` also supports databases via the `dplyr` package, once you've installed, read `vignette("dbplyr")` to learn more.
+
+## Data: `starwars`
+
+```{r}
+library(tidyverse)
+library(dplyr)
+dim(starwars)
+starwars
+```
+To explore the basic data manipulation verbs of `dplyr`, we'll use the dataset `starwars`. This dataset contains `r nrow(starwars)` characters and comes from the [Star Wars API](http://swapi.co), and is documented in `?starwars`
+ 
+
+Note that `starwars` is a tibble, a modern reimagining of the data frame. It's particularly useful for large datasets because it only prints the first few rows. You can learn more about tibbles at <http://tibble.tidyverse.org>; in particular you can convert data frames to tibbles with `as_tibble()`.
+
+## Single table verbs
+
+`dplyr` aims to provide a function for each basic verb of data manipulation. These verbs can be organised into three categories based on the component of the dataset that they work with:
+
+* Rows:
+  * `filter()` chooses rows based on column values.
+  * `slice()` chooses rows based on location.
+  * `arrange()` changes the order of the rows.
+  
+* Columns:
+  * `select()` changes whether or not a column is included.
+  * `rename()` changes the name of columns.
+  * `mutate()` changes the values of columns and creates new columns.
+  * `relocate()` changes the order of the columns.
+
+* Groups of rows:
+  * `summarise()` collapses a group into a single row.
+  
+### The pipe
+
+All of the `dplyr` functions take a data frame (or tibble) as the first argument.  Rather than forcing the user to either save intermediate objects or nest functions, `dplyr` provides the `%>%` operator from `magrittr`. `x %>% f(y)` turns into `f(x, y)` so the result from one step is then "piped" into the next step.  You can use the pipe to rewrite multiple operations that you can read left-to-right, top-to-bottom (reading the pipe operator as "then"). 
+
+### Filter rows with `filter()`
+
+`filter()` allows you to select a subset of rows in a data frame. Like all single verbs, the first argument is the tibble (or data frame). The second and subsequent arguments refer to variables within that data frame, selecting rows where the expression is `TRUE`.
+
+For example, we can select all character with light skin color and brown eyes with:
+
+```{r}
+starwars %>% filter(skin_color == "light", eye_color == "brown")
+```
+
+This is roughly equivalent to this base R code:
+
+```{r, eval = FALSE}
+starwars[starwars$skin_color == "light" & starwars$eye_color == "brown", ]
+```
+
+### Arrange rows with `arrange()`
+
+`arrange()` works similarly to `filter()` except that instead of filtering or selecting rows, it reorders them. It takes a data frame, and a set of column names (or more complicated expressions) to order by. If you provide more than one column name, each additional column will be used to break ties in the values of preceding columns:
+
+```{r}
+starwars %>% arrange(height, mass)
+```
+
+Use `desc()` to order a column in descending order:
+
+```{r}
+starwars %>% arrange(desc(height))
+```
+
+###  Choose rows using their position with `slice()`
+
+slice() lets you index rows by their (integer) locations. It allows you to select, remove, and duplicate rows. 
+
+We can get characters from row numbers 5 through 10.
+```{r}
+starwars %>% slice(5:10)
+```
+
+
+```{r}
+starwars %>% slice(n = 1:5)
+```
+
+### Select columns with `select()`
+
+Often you work with large datasets with many columns but only a few are actually of interest to you. `select()` allows you to rapidly zoom in on a useful subset using operations that usually only work on numeric variable positions:
+
+```{r}
+# Select columns by name
+starwars %>% select(hair_color, skin_color, eye_color)
+# Select all columns between hair_color and eye_color (inclusive)
+starwars %>% select(hair_color:eye_color)
+# Select all columns except those from hair_color to eye_color (inclusive)
+starwars %>% select(-(hair_color:eye_color))
+# Select all columns ending with color
+starwars %>% select(ends_with("color"))
+```
+
+
+You can rename variables with `select()` by using named arguments:
+
+```{r}
+starwars %>% select(home_world = homeworld)
+```
+
+But because `select()` drops all the variables not explicitly mentioned, it's not that useful. Instead, use `rename()`:
+
+```{r}
+starwars %>% rename(home_world = homeworld)
+```
+
+
+### Add new columns with `mutate()`
+
+Besides selecting sets of existing columns, it's often useful to add new columns that are functions of existing columns.  This is the job of `mutate()`:
+
+```{r}
+starwars %>% mutate(height_m =  height / 100)
+```
+
+We can't see the height in meters we just calculated, but we can fix that using a select command.
+
+```{r}
+starwars %>% 
+  mutate(height_m = height / 100) %>%
+  select(height_m, height, everything())
+```
+
+`dplyr::mutate()` is similar to the base `transform()`, but allows you to refer to columns that you've just created:
+
+```{r}
+starwars %>% mutate(
+  height_m = height / 100,
+  BMI = mass/(height_m^2)
+  ) %>%
+  select(BMI, everything())
+```
+
+If you only want to keep the new variables, use `transmute()`:
+
+```{r}
+starwars %>% transmute(
+  height_m = height / 100,
+  BMI = mass/(height_m^2)
+)
+```
+
+
+
+### Summarize values with `summarise()`
+
+The last verb is `summarise()`. It collapses a data frame to a single row.
+
+```{r}
+starwars %>%
+  summarise(
+    height = mean(height, na.rm = TRUE)
+  )
+```
+
+It's not that useful until we learn the `group_by()` verb below.
+
+
+### Commonalities
+
+You may have noticed that the syntax and function of all these verbs are very similar:
+
+* The first argument is a data frame.
+
+* The subsequent arguments describe what to do with the data frame. You can
+  refer to columns in the data frame directly without using `$`.
+
+* The result is a new data frame
+
+Together these properties make it easy to chain together multiple simple steps to achieve a complex result. 
+
+These five functions provide the basis of a language of data manipulation. At the most basic level, you can only alter a tidy data frame in five useful ways: you can reorder the rows (`arrange()`), pick observations and variables of interest (`filter()` and `select()`), add new variables that are functions of existing variables (`mutate()`), or collapse many values to a summary (`summarise()`). 
+
+## Combining functions with `%>%` 
+
+
+If you don't want to name the intermediate results, you need to wrap the function calls inside each other:
+
+```{r}
+summarise(
+  select(
+    group_by(starwars, species, skin_color),
+      height, mass
+    ),
+    height = mean(height, na.rm = TRUE),
+    mass = mean(mass, na.rm = TRUE)
+  )
+```
+
+This is difficult to read because the order of the operations is from inside to out. Thus, the arguments are a long way away from the function. To get around this problem, `dplyr` provides the `%>%` operator from `magrittr`. `x %>% f(y)` turns into `f(x, y)` so you can use it to rewrite multiple operations that you can read left-to-right, top-to-bottom (reading the pipe operator as "then"):
+
+```{r, eval = FALSE}
+starwars %>%
+  group_by(species, skin_color) %>%
+  select(height, mass) %>%
+  summarise(
+    height = mean(height, na.rm = TRUE),
+    mass = mean(mass, na.rm = TRUE)
+  ) 
+```
+
+## Patterns of operations
+
+The `dplyr` verbs can be classified by the type of operations they
+accomplish (we sometimes speak of their **semantics**, i.e., their
+meaning). It's helpful to have a good grasp of the difference between 
+select and mutate operations.
+
+### Selecting operations
+
+One of the appealing features of `dplyr` is that you can refer to
+columns from the tibble as if they were regular variables. However,
+the syntactic uniformity of referring to bare column names hides
+semantic differences across the verbs. A column symbol supplied to
+`select()` does not have the same meaning as the same symbol supplied
+to `mutate()`.
+
+Selecting operations expect column names and positions. Hence, when
+you call `select()` with bare variable names, they actually represent
+their own positions in the tibble. The following calls are completely
+equivalent from `dplyr`'s point of view:
+
+```{r}
+# `year` represents the integer 1
+select(starwars, name)
+select(starwars, 1)
+```
+
+By the same token, this means that you cannot refer to variables from
+the surrounding context if they have the same name as one of the
+columns. In the following example, `height` still represents 2, not 5:
+
+```{r}
+height <- 5
+select(starwars, height)
+```
+
+One useful subtlety is that this only applies to bare names and to
+selecting calls like `c(height, mass)` or `height:mass`. In all other
+cases, the columns of the data frame are not put in scope. This allows
+you to refer to contextual variables in selection helpers:
+
+```{r}
+name <- "color"
+select(starwars, ends_with(name))
+```
+
+These semantics are usually intuitive. But note the subtle difference:
+
+```{r}
+name <- 5
+select(starwars, name, identity(name))
+```
+
+In the first argument, `name` represents its own position `1`. In the
+second argument, `name` is evaluated in the surrounding context and
+represents the fifth column.
+
+For a long time, `select()` used to only understand column positions.
+Counting from `dplyr` 0.6, it now understands column names as well. This
+makes it a bit easier to program with `select()`:
+
+```{r}
+vars <- c("name", "height")
+select(starwars, all_of(vars), "mass")
+```
+
+
+### Mutating operations
+
+Mutate semantics are quite different from selection semantics. Whereas
+`select()` expects column names or positions, `mutate()` expects
+*column vectors*. 
+We will set up a smaller tibble to use for our examples.
+
+```{r}
+df <- starwars %>%
+  select(name, height, mass)
+```
+
+When we use `select()`, the bare column names stand for their own
+positions in the tibble. For `mutate()` on the other hand, column
+symbols represent the actual column vectors stored in the tibble.
+Consider what happens if we give a string or a number to `mutate()`:
+
+```{r}
+mutate(df, "height", 2)
+```
+
+`mutate()` gets length-1 vectors that it interprets as new columns in
+the data frame. These vectors are recycled so they match the number of
+rows. That's why it doesn't make sense to supply expressions like
+`"height" + 10` to `mutate()`. This amounts to adding 10 to a string!
+The correct expression is:
+
+```{r}
+mutate(df, height + 10)
+```
+
+In the same way, you can unquote values from the context if these
+values represent a valid column. They must be either length 1 (they
+then get recycled) or have the same length as the number of rows. In
+the following example we create a new vector that we add to the data
+frame:
+
+```{r}
+var <- seq(1, nrow(df))
+mutate(df, new = var)
+```
+
+A case in point is `group_by()`. While you might think it has select
+semantics, it actually has mutate semantics. This is quite handy as it
+allows to group by a modified column:
+
+```{r}
+group_by(starwars, skin_color)
+group_by(starwars, skin_color = as.factor(skin_color))
+group_by(starwars, height_binned = cut(height, 3))
+```
+
+This is why you can't supply a column name to `group_by()`. This
+amounts to creating a new column containing the string recycled to the
+number of rows:
+
+```{r}
+group_by(df, "month")
+```
+
+## The data.table package for big data 
+
+The data.table is an alternative to R's default data.frame to handle tabular data.
+
+The reason it's so popular is because of the speed of execution on larger data and the terse syntax. So, effectively you type less code and get much faster speed. It is one of the most downloaded packages in R and is preferred by Data Scientists.
+
+It is probably one of the best things that have happened to R programming language as far as speed is concerned.
+
+Though data.table provides a slightly different syntax from the regular R data.frame, it is quite intuitive. So once you get it, it feels obvious and natural that you wouldn't want to go back the base R data.frame syntax.
+
+By the end of this guide you will understand the fundamental syntax of data.table and the structure behind it. All the core data manipulation functions of data.table, in what scenarios they are used and how to use it, with some advanced tricks and tips as well.
+
+data.table is authored by Matt Dowle with significant contributions from Arun Srinivasan and many others.
+
+
+```{r}
+# Install from CRAN
+#install.packages('data.table')
+
+# Install Dev version from Gitlab
+#install.packages("data.table", repos="https://Rdatatable.gitlab.io/data.table")
+#data.table::update.dev.pkg()
+```
+
+#### importing data 
+```{r}
+library(data.table)
+## fast read 
+#mt <- fread("https://raw.githubusercontent.com/selva86/datasets/master/mtcars.csv")
+#head(mt)
+#class(mt)
+```
+The imported data is stored directly as a data.table.
+
+As you see from the above output, the `data.table` inherits from a `data.frame` class and therefore is a `data.frame` by itself. So, functions that accept a `data.frame` will work just fine on `data.table` as well.
+
+Because the dataset we imported was small, the `read.csv()`  speed was good enough. However, the speed gain becomes evident when you import a large dataset (millions of rows).
+
+To get a flavor of how fast `fread()` is, run the below code. It creates a 1M rows csv file. Then reads it back again. The time taken by `fread()` and `read.csv()` functions gets printed in console.
+```{r}
+# Create a large .csv file
+set.seed(100)
+m <- data.frame(matrix(runif(10000000), nrow=1000000))
+write.csv(m, 'm2.csv', row.names = F)
+
+# Time taken by read.csv to import
+system.time({m_df <- read.csv('m2.csv')})
+#  user  system elapsed 
+# 28.410   0.709  29.705 
+
+# Time taken by fread to import
+system.time({m_dt <- fread('m2.csv')})
+#  user  system elapsed 
+#  0.396   0.133   0.393 
+# system("rm m2.csv")
+```
+
+The time difference gets wider when the file size increases.
+
+#### How to convert data.frame to data.table
+
+You can convert any `data.frame` into `data.table` using one of the approaches:
+
+ 1. `data.table(df)` or `as.data.table(df)`
+ 2. `setDT(df)`
+
+The difference between the two approaches is: `data.table(df)` function will create a copy of df and convert it to a data.table.
+
+Whereas, `setDT(df)` converts it to a data.table in-place. That means, the df itself gets converted to a data.table and you don't have to assign it to a different object.
+
+As a result, there is no copy made and no duplication of the same data.
+
+Let's reload the `mtcars` data frame from R's default datasets package.
+
+```{r}
+## reload data
+data("mtcars")
+head(mtcars)
+```
+
+The `data.table()` does not have any rownames. So if the data.frame has any rownames, you need to store it as a separate column before converting to data.table.
+```{r}
+mtcars$carname <- rownames(mtcars)
+mtcars_dt <- as.data.table(mtcars)
+class(mtcars_dt)
+```
+Alternately, use `setDT() `to convert it to `data.table` in place
+
+```{r}
+mtcars_copy <- copy(mtcars)
+setDT(mtcars_copy)
+class(mtcars_copy)
+```
+
+#### How to convert data.table to data.frame
+Conversely, use `as.data.frame(dt)` or `setDF(dt)` to convert a `data.table` to a `data.frame`.
+```{r}
+setDF(mtcars_copy)
+class(mtcars_copy)
+```
+#### Filtering rows based on conditions
+The main difference with data.frame is: data.table is aware of its column names.
+
+So while filtering, passing only the columns names inside the square brackets is sufficient.
+
+```{r}
+# dataframe syntax
+mtcars[mtcars$cyl == 6 & mtcars$gear == 4, ]
+# datatable syntax
+mtcars_dt[cyl==6 & gear==4, ]
+```
+
+### How to select given columns
+
+Now, let see how to subset columns.
+
+The most unexpected thing you will notice with data.table is you cant select a column by its numbered position in a data.table.
+
+For example, you can expect the following to work in a data.frame.
+
+```{r}
+mtcars[, 1]
+```
+
+If you want to get that column by position alone, you should add an additional argument, with=FALSE.
+```{r}
+mtcars_dt[, 1,with=F]
+```
+
+The returned output is a 1-column data.table.
+
+An alternate way and a better practice is to pass in the actual column name.
+```{r}
+mtcars_dt[, mpg]
+```
+
+Notice here that the `mpg` is not a string as it's not written within quotes.
+
+#### How to select multiple columns using a character vector
+```{r}
+columns <- c('mpg', 'cyl', 'disp')
+mtcars_dt
+mtcars_dt[, columns,with=F]
+mtcars_dt[, .(mpg, cyl, gear)]
+```
+#### How to drop columns
+How to drop the mpg, `cyl` and gear columns alone?
+
+Place them in a vector and use the ! in front to drop them. This effectively returns all columns except those present in the vector.
+
+```{r}
+drop_cols <- c("mpg", "cyl", "gear")
+mtcars_dt[, !drop_cols, with=FALSE]
+```
+#### How to rename columns
+The `setnames()` function is used for renaming columns.
+
+It takes the data.table (or data.frame), current name and new name as arguments and changes the column names in place without any copying of data. Always recommended!
+
+```{r}
+setnames(mtcars_dt, 'vs', 'engine_type')
+colnames(mtcars_dt)
+```
+
+#### Creating a new column from existing columns
+You can always create a new column as you do with a data.frame, but, data.table lets you create column from within square brackets. This saves key strokes.
+```{r}
+# data.frame syntax (works on data.table)
+mtcars_dt$cyl_gear <- mtcars_dt$cyl + mtcars_dt$gear
+
+# data.table syntax
+mtcars_dt[, cyl_gear2 := cyl + gear]
+mtcars_dt
+```
+
+To create multiple new columns at once, use the special assignment symbol as a function.
+```{r}
+mtcars_dt[,  `:=`(cyl_gear3 = cyl * gear,
+                  cyl_gear4 = cyl - gear)]
+mtcars_dt
+```
+To select only specific columns, use the list or dot symbol instead.
+```{r}
+mtcars_dt[,  .(cyl_gear3 = cyl * gear,
+                  cyl_gear4 = cyl - gear)]
+```
+Now let's see a special but frequently used case.
+
+Let's suppose you have the column names in a character vector and want to select those columns alone from the data.table. Passing it inside the square brackets don't work.
+```{r}
+columns <- c('mpg', 'cyl', 'disp')
+mtcars_dt[, columns,with=F]
+```
+#### How to create new columns using character vector
+Suppose you want to create a new column but you have the name of that new column in another character vector. How to create the new column without using the actual column name?
+
+For example, you have the new column name in the `myvar` vector.
+
+And, you want to assign some value, say the value of 1 to this column. Doing this will create a new column named `myvar`. And not `var1` as intended.
+
+To create a column named `var1` instead, keep `myvar` inside a vector.
+```{r}
+# Create column named 'var1'
+myvar <- c('var1')
+# Syntax 1
+mtcars_dt[, c(myvar):=1]
+
+# Syntax 2
+mtcars_dt[, (myvar):=2]
+```
+
+#### Grouping
+Now, let's move on to the second major and awesome feature of R data.table: grouping using by.
+
+In base R, grouping is accomplished using the `aggregate()` function. It's a bit cumbersome and hard to remember the syntax. All the functionalities can be accomplished easily using the `by` argument within square brackets.
+
+For example, in `mtcars` data, how to get the mean mileage for each cylinder type?
+
+Answer: Since you want to see the mileage by `cyl` column, set `by = cyl` inside the square brackets.
+```{r}
+mtcars_dt[, .(mean_mileage=mean(mpg)), by=cyl]
+```
+You can even add multiple columns to the `by` argument.
+```{r}
+mtcars_dt[, .(mean_mileage=mean(mpg)), by=.(cyl, gear)]
+```
+
+A slightly complex group-by problem
+Now, lets see some really special cases.
+
+How to select the first occurring value of mpg for each unique `cyl` value
+
+That is, instead of taking the mean of mileage for every cylinder, you want to select the first occurring value of mileage. How to do that?
+```{r}
+mtcars_dt[, .(first_mileage=mpg[1]), by=cyl]
+```
+
+What to do if you want the second value? Just replace the 1 with 2.
+```{r}
+mtcars_dt[, .(second_mileage=mpg[2]), by=cyl]
+```
+
+And what if you want the last value?
+You can either use `length(mpg)` or `.N`:
+
+```{r}
+# Option 1
+mtcars_dt[, .(first_mileage=mpg[length(mpg)]), by=cyl]
+
+# Option 2
+mtcars_dt[, .(first_mileage=mpg[.N]), by=cyl]
+```
+
+#### What does `.N` and `.I` do
+`.N` contains the number of rows present.
+
+So the following will get the number of rows for each unique value of `cyl`.
+
+```{r}
+mtcars_dt[, .N, by=cyl]
+```
+
+Now, how to create row numbers of items?
+
+It can be done using `.I` variable, short for `Index` (I guess).
+
+Lets first understand what `.I` returns.
+
+```{r}
+mtcars_dt[, .I]
+```
+
+It returns all the row numbers.
+
+Now, how to return the row numbers where `cyl=6`?
+
+This can get confusing in the beginning so pay close attention.
+
+If you want to get the row numbers of items that satisfy a given condition, you might tend to write like this:
+```{r}
+mtcars_dt[cyl==6, .I]
+```
+
+But this returns the wrong answer because, data.table has already filtered the rows that contain `cyl` value of 6. So, what you want to do instead is to write that condition to subset `.I` alone instead of the whole `data.table`.
+
+```{r}
+mtcars_dt[, .I[cyl==6]]
+```
+
+The result is same as using the `which()` function, which we used in data frames.
+```{r}
+mtcars_dt[, which(cyl==6)]
+```
+
+#### Chaining
+Data.table offers unique features there makes it even more powerful and truly a Swiss army knife for data manipulation.
+
+First lets understand what chaining is.
+
+Using chaining, you can do multiple data.table operations one after the other without having to store intermediate results.
+
+For example, instead of writing two statements you can do it on one.
+
+Below code sorts after grouping by `cyl`:
+```{r}
+dt1 <- mtcars_dt[, .(mean_mpg=mean(mpg),
+                     mean_disp=mean(disp),
+                     mean_wt=mean(wt),
+                     mean_qsec=mean(qsec)), by=cyl]
+output <- dt1[order(cyl), ]
+output
+```
+
+With chaining, that is, by attaching the square brackets at the end, it's done in one step.
+```{r}
+output <- mtcars_dt[, .(mean_mpg=mean(mpg),
+                     mean_disp=mean(disp),
+                     mean_wt=mean(wt),
+                     mean_qsec=mean(qsec)), by=cyl][order(cyl), ]
+```
+
+Actually, chaining is available in data frames as well, but with features like `by`, it becomes convenient to use in a data.table.
+
+#### What is `.SD` and How to write functions inside data.table
+Next, lets see how to write functions within a data.table square brackets.
+
+Let's suppose, you want to compute the mean of all the variables, grouped by `cyl`. How to do that?
+
+You can create the columns one by one by writing by hand. Or, you can use the `lapply()` function to do it all in one go.
+
+But `lapply()` takes the data.frame as the first argument. Then, how to use `lapply()` inside a data.table?
+
+You can use the `.SD` object as the first argument for `lapply()`.
+
+But, what is the `.SD` object?
+
+It is nothing but a data.table that contains all the columns of the original data.table except the column specified in `by` argument. So, here is what it looks like.
+
+```{r}
+mtcars_dt[, .SD, by=cyl]
+```
+
+So, now you can pass this as the first argument in `lapply()`. The 11th column in `.SD` is rownames, so let's include only the first 10.
+
+```{r}
+output <- mtcars_dt[, lapply(.SD[, 1:10, with=F], mean), by=cyl]
+output
+```
+
+Optionally, Instead of subsetting `.SD` like this, You can specify the columns that should be part of `.SD` using the `.SDCols` object
+
+```{r}
+output <- mtcars_dt[, lapply(.SD, mean), by=cyl, .SDcols=c("mpg", "disp", "hp", "drat", "wt", "qsec")]
+output
+```
+The output now contains only the specified columns.
+
+### Keys
+
+Now, we have come to the "key" concept for data.tables: Keys
+
+Let's understand why keys can be useful and how to set it.
+
+Setting one or more keys on a data.table enables it to perform binary search, which is many order of magnitudes faster than linear search, especially for large data.
+
+As a result, the filtering operations are super fast after setting the keys.
+
+There is a side effect though. By setting a key, the data.table gets sorted by that key.
+
+So how to set a key?
+
+Just use the `setkey()` function.
+```{r}
+setkey(mtcars_dt, carname)
+```
+It's so fast making it look like nothing happened. But it internally sorted data.table with `carname` as the key.
+```{r}
+mtcars_dt
+```
+If you notice, this table is sorted by `carname` variable.
+
+To check the keys for a data table, you can use the `key()` function.
+
+```{r}
+key(mtcars_dt)
+```
+
+Once the key is set, merging data.tables is very direct. I have distributed few columns of `mtcars` in the following data.tables. You can join these two data.tables:
+
+```{r}
+dt1 <- mtcars_dt[,.(carname, mpg, cyl)]
+dt2 <- mtcars_dt[1:10, .(carname, gear)]
+dt1[dt2]
+```
+
+This returns `dt1`'s rows using `dt2` based on the key of these data.tables.
+
+You can also set multiple keys if you wish. Now, how to remove the keys?
+
+Use `setkey()` and set it to NULL. But the data.table will not go back to it original row arrangement.
+
+```{r}
+setkey(mtcars_dt, NULL)
+```
+
+Another aspect of setting keys is the `keyby` argument.
+
+Using `keyby` you can do grouping and set the by column as a key in one go.
+
+For example, in this example we saw earlier, you can skip the chaining by using `keyby` instead of just `by`.
+
+```{r}
+# Group and sort using chaining
+output <- mtcars_dt[, .(mean_mpg=mean(mpg),
+                     mean_disp=mean(disp),
+                     mean_wt=mean(wt),
+                     mean_qsec=mean(qsec)), by=cyl][order(cyl), ]
+
+# Group and sort using keyby
+output <- mtcars_dt[, .(mean_mpg=mean(mpg),
+                     mean_disp=mean(disp),
+                     mean_wt=mean(wt),
+                     mean_qsec=mean(qsec)), keyby=cyl]
+key(output)
+```
+
+As a result, the output has the key as `cyl`.
+
+#### How to join two or more data.tables
+
+The `data.table` package provides a faster implementation of the `merge()` function. The syntax is pretty much the same as base R function `merge()`.
+```{r}
+dt1 <- mtcars_dt[5:25,.(carname, mpg, cyl)]
+dt2 <- mtcars_dt[1:10, .(carname, gear)]
+dt3 <- mtcars_dt[2:12, .(carname, disp)]
+# Inner Join
+merge(dt1, dt2, by='carname')
+#> <returns 6 rows>
+
+# Left Join
+merge(dt1, dt2, by='carname', all.x = T)
+#> <returns 21 rows>
+
+# Outer Join
+merge(dt1, dt2, by='carname', all = T)  
+#> <returns 25 rows>
+```
+
+#### How to merge multiple data.tables in one shot
+
+This is bit of a hack by using the `Reduce()` function to repeatedly merge multiple data.tables stored in a list. `Reduce()` takes in a function that has to be applied consecutively (which is `merge_func` in this case) and a list that stores the arguments for function.
+
+```{r}
+# Merge multiple data.tables 
+dt_list    <- list(dt1, dt2, dt3)
+merge_func <- function(...) merge(..., all = TRUE, by='carname')
+dt_merged  <- Reduce(merge_func, dt_list)
+#> <returns 25 rows from outer join>
+```
+
+#### Pivot Table operations
+The `dcast.data.table()` is the function used for doing pivot table like operations as seen in spreadsheet softwares like Microsoft Office Excel or Google spreadsheets.
+
+The good thing is `dcast.data.table()` works equally well on data.frame object as well.
+
+Let's create a pivot table showing the mean mileage (mpg) for cylinders (cyl) vs carburetter (carb)
+
+```{r}
+dcast.data.table(mtcars_dt, cyl ~ carb, fun.aggregate = mean, value.var = 'mpg')
+```
+
+So how to understand the syntax?
+
+There are 4 primary arguments:
+
+ 1. `data.table`
+ 2. `formula`: Rows of the pivot table on the left of "~" and columns of the pivot on the right
+ 3. `value.var`: column whose values should be used to fill up the pivot table
+ 4. `fun.aggregate`: the function used to aggregate the value.var column.
+ 
+`dcast.data.table()` is versatile in allowing multiple columns to be passed to the value.var and allows multiple functions to fun.aggregate as well.
+
+#### `set()` A magic function for fast assignment operations
+
+The `set()` command is an incredibly fast way to assign values to a new column.
+
+The syntax is: `set(dt, i, j, value)`, where i is the row number and j is the column number.
+
+As a best practice, always explicitly use integers for i and j, that is, use `10L` instead of `10`.
+
+It is usually used in for-loops and is literally thousands of times faster. Yes, it is so fast even when used within a for-loop, which is proof that for-loop is not really a bottleneck for speed. It is the underlying data structure related overhead that causes for-loop to be slow, which is exactly what `set()` avoids.
+
+Besides, it works on a data.frame object as well. It works like magic!
+
+Below is an example to illustrate the power of `set()` taken from official documentation itself. The speed benchmark may be outdated, but, run and check the speed by yourself to believe it.
+
+```{r}
+m = matrix(1,nrow=100000,ncol=100)
+DF = as.data.frame(m)
+DT = as.data.table(m)    
+
+system.time(for (i in 1:10000) DF[i,1] <- i)
+
+
+system.time(for (i in 1:10000) set(DT,i,1L,i))
+
+```
+
+We have covered all the core concepts in order to work with data.table package.

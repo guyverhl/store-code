@@ -1,0 +1,325 @@
+---
+title: "Tutorial 09: Regression and Machine Learning Algorithms"
+author: "<br>Department of Statistics and Actuarial Science</br> The University of Hong Kong"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: paper
+    toc: yes
+    toc_depth: 3
+---
+<style>
+  body {font-size: 12pt;}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\ 
+
+# Regression
+
+## Linear Regression
+
+### Simple Linear Regression
+$$
+  \mathrm{E}(y|x) = \alpha + \beta x
+$$
+```{r eval=FALSE}
+lm(y~x)
+```
+
+- with no intercept term, i.e.,
+$$
+  \mathrm{E}(y|x) = \beta x
+$$
+```{r eval=FALSE}
+lm(y~x-1)
+```
+
+
+### Polynomial Regression
+
+$$
+  \mathrm{E}(y|x) = \beta_0 + \beta_1x + \beta_2x^2 + \dotsb + \beta_kx^k
+$$
+
+```{r eval=FALSE}
+lm(y~x+I(x^2)+I(x^3))
+```
+- Be careful with the function `I()` here
+
+
+### Multiple Linear Regression
+
+$$
+  \mathrm{E}(y|\mathbf{x}) = \mathbf{x}\boldsymbol{\beta} = \beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k
+$$
+
+```{r eval=FALSE}
+lm(y~x1+x2+x3)
+
+# or
+
+lm(y~., data=dataset)
+```
+
+
+### Generalized Linear Model (GLM)
+
+$$
+  g(\mathrm{E}(y|\mathbf{x})) = \mathbf{x}\boldsymbol{\beta} = \beta_0 + \beta_1x_1 + \beta_2x_2 + \dotsb + \beta_kx_k
+$$
+
+```{r eval=FALSE}
+glm(y~x1+x2+x3, family)
+```
+
+- Multiple linear regression:
+  - $g(x)=x$
+  - `family = gaussian`
+  
+- Logistic regression:
+  - $y = p$ probability of occurance of the event
+  - $g(x)=\mathrm{logit}(x)=\log(\frac{x}{1-x})$
+  - `family = binomial`
+  
+- Poisson regression:
+  - $y = \lambda$ count of occurances in fixed amount of time/space
+  - $g(x)=\log(x)$
+  - `family = poisson`
+  - add `offset` term to predict ratio
+
+  
+### Nonlinear regression
+
+$$
+  \mathrm{E}(y|\mathbf{x}) = f(\mathbf{x}; \boldsymbol{\beta})
+$$
+
+```{r eval=FALSE}
+nls(formula)
+```
+\ 
+
+
+
+
+## Exercise
+`bcmort` dataset in `ISwR` package: Danish study on the effect of screening for breast cancer
+
+- `age` a factor with levels 50-54, 55-59, 60-64, 65-69, 70-74, and 75-79 
+- `cohort` a factor with levels Study gr., Nat.ctr., Hist.ctr., and Hist.nat.ctr. 
+- `bc.deaths` a numeric vector, number of breast cancer deaths 
+- `p.yr` a numeric vector, person-years under study 
+
+Fit a Poisson regression model to the data with `age` and `cohort` as explanatory variables.
+
+```{r}
+library(ISwR)
+bcmort.pois = glm(bc.deaths~age+cohort, offset=log(p.yr), family=poisson, data=bcmort)
+summary(bcmort.pois)
+```
+
+\ 
+
+
+
+# A Landscape of Machine Learning
+
+![](AI-ML-DL.png)
+
+- Supervised Learning
+
+  * Basic models and methods (ridge regression, lasso, variable selection, ...)
+  
+  * Feature engineering (feature extraction, variable transformation, basis expansion, ... )
+  
+  * Kernel methods (kernel trick, support vector machines, parameter tuning, ...)
+  
+  * Tree-based methods (decision trees,  random forests, gradient boosting machines, ...)
+  
+  * Neural networks (multi-layer perception, feedforward network, backpropogation, ...)
+  
+  * Deep learning (feature learning, autoencoder, convolutional NN, recurrent NN, ...)
+
+- Unsupervised Learning 
+  * Clustering methods, Dimensionality reduction, Principal component analysis, etc 
+
+![](super-unsuper.png)
+
+
+## Distance-based Methods: K-Means Clustering
+The goal of the K-means algorithm is to find groups in the data, with the number of groups represented by the variable K. The algorithm works iteratively to assign each data point to one of K groups based on the features that are provided. Data points are clustered based on feature similarity. 
+
+Given a set of observations $(x1, x2,\dots,xn)$, where each observation is a d-dimensional real vector, k-means clustering aims to partition the n observations into $k (\le n)$ sets $S = {S_1, S_2,\dots,S_k}$ so as to minimize the within-cluster sum of squares (WCSS) (i.e. variance). Formally, the objective is to find:
+
+$$
+\underset{S}{\mathrm{argmin}}\sum_{i=1}^{n}\sum_{x \in S_{i}} \Vert {x - \mu_{i}}\Vert ^{2}
+$$
+
+The standard algorithm for K-Means:
+
+* Initialization: randomly chooses k observations from the data set and uses these as the initial means;
+
+* Assignment step: Assign each observation to the cluster whose mean has the least squared Euclidean distance, this is intuitively the "nearest" mean;
+
+* Update step: Calculate the new means to be the centroids of the observations in the new clusters.
+
+```{r echo=FALSE, fig.align="center", out.width = 300}
+knitr::include_graphics(c('K_means.gif')) 
+```
+
+The results of the K-means clustering algorithm are:
+
+1. The centroids of the K clusters.
+
+2. Labels for the training data (each data point is assigned to a single cluster).
+
+(Reference:  https://en.wikipedia.org/wiki/K-means_clustering)
+
+&nbsp;  
+
+
+
+### Example: Use K-means to Find the Main Colors of a Image
+
+```{r echo=FALSE, results='hide'}
+suppressMessages(library(dplyr))
+suppressMessages(library(OpenImageR))
+suppressMessages(library(ClusterR))
+options(warn=-1)
+```
+
+Read and Show the image (A jpg image, with 3 RGB channels)
+```{r}
+img <- readImage("ColorfulBird.jpg") # Read the image
+dim(img)
+```
+
+Show the image in R
+```{r}
+imageShow(img)
+```
+
+Convert the image to a n*3 matrix (3 represents the RGB colors)
+```{r}
+im2 = apply(img, 3, as.vector)
+dim(im2)
+```
+
+Find the optimal number of clusters
+Some popular used criteria: 
+
+* variance_explained : the sum of the within-cluster-sum-of-squares-of-all-clusters divided by the total sum of squares
+* WCSSE : the sum of the within-cluster-sum-of-squares-of-all-clusters
+* dissimilarity : the average intra-cluster-dissimilarity of all clusters (the distance metric defaults to euclidean)
+* silhouette : the average silhouette width of all clusters (the distance metric defaults to euclidean)
+* distortion_fK : this criterion is based on the following paper, 'Selection of K in K-means clustering' (https://www.ee.columbia.edu/~dpwe/papers/PhamDN05-kmeans.pdf)
+* AIC : the Akaike information criterion
+* BIC : the Bayesian information criterion
+* Adjusted_Rsquared : the adjusted R^2 statistic
+
+```{r}
+opt = Optimal_Clusters_KMeans(im2, max_clusters = 10, plot_clusters = T, verbose = F, criterion = 'distortion_fK', fK_threshold = 0.9)
+```
+
+Values below the fixed threshold (here fK_threshold = 0.90) could be recommended for clustering. So we can either choose 2, 3, 6 or 9.
+
+Perform K-means clustering with 6 clusters
+```{r}
+km_rc = KMeans_rcpp(im2, clusters = 6, num_init = 2, max_iters = 100, 
+                    initializer = 'optimal_init', verbose = T)
+```
+
+The ratio of between SS over total SS. The closer to 1, the better the classification.
+```{r}
+km_rc$between.SS_DIV_total.SS
+```
+
+The center of each cluster:
+```{r}
+km_rc$centroids
+```
+
+Regenerate the image using the centroids.
+```{r}
+getcent = km_rc$centroids
+getclust = km_rc$clusters
+new_im = getcent[getclust, ]     
+# each observation is associated with the nearby centroid
+dim(new_im) = c(nrow(img), ncol(img), 3)        
+# back-convertion to a 3-dimensional image
+imageShow(new_im)
+```
+
+The traditional K-means function (optional).
+```{r}
+km <- kmeans(im2,centers=3) 
+getcent2 = km$centers
+getclust2 = km$cluster
+new_im2 = getcent2[getclust2, ]     
+# each observation is associated with the nearby centroid
+dim(new_im2) = c(nrow(img), ncol(img), 3)        
+# back-convertion to a 3-dimensional image
+imageShow(new_im2)
+```
+
+
+\ 
+
+
+
+## The `caret` package
+
+- The caret package tries to consolidate and provide consistency for different ML algorithms that are distributed via different packages, developed by different authors, and often use different syntax.
+- Please refer to the Lecture Note for concrete examples.
+- Reference: http://topepo.github.io/caret
+
+
+### Data Splitting
+```{r eval=F}
+set.seed(2604)
+trainIndex <- createDataPartition(data$y, p = .8, list = FALSE)
+train <- data[ trainIndex,]
+test  <- data[-trainIndex,]
+```
+
+
+
+### Training
+```{r eval=F}
+model = train(y ~ ., data, method, preProcess, metric, trControl, tuneGrid, tuneLength, ...)
+```
+- `method`: http://topepo.github.io/caret/train-models-by-tag.html
+- `preProcess`: http://topepo.github.io/caret/pre-processing.html
+- `metric`: by default, possible values are "RMSE" and "Rsquared" for regression and "Accuracy" and "Kappa" for classification. Other custom performance metrics can be used via the `summaryFunction` argument in `trainControl`
+- `trControl`: output from `trainControl(method, number, summaryFunction, ...)`
+  - `method`: The resampling method: `boot`, `cv`, `LOOCV`, `LGOCV`, `repeatedcv`, `timeslice`, `none` and `oob`
+  - `number`: either the number of folds or number of resampling iterations
+  - `summaryFunction`: a function to compute performance metrics across resamples
+- `tuneGrid`: A data frame with possible tuning values (`caret::modelLookup()`)
+- `tuneLength`: An integer denoting the amount of granularity in the tuning parameter grid
+
+
+
+### Prediction
+```{r eval=F}
+model_pred = predict(model, newdata = test)
+```
+
+
+### Evaluation
+- Measures for Regression: RMSE, Rsquared and MAE 
+```{r eval=F}
+postResample(pred = model_pred, obs = data$y)
+```
+
+- Measures for Predicted Classes: confusion matrix 
+  (ref: [confusion matrix](https://en.wikipedia.org/wiki/Confusion_matrix))
+```{r eval=F}
+confusionMatrix(data = model_pred, reference = data$y)
+```
+

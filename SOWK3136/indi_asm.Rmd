@@ -1,0 +1,256 @@
+---
+title: "indi_asm"
+author: "Chan Hou Long, Guyver"
+date: "10/17/2021"
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1
+## 1a, b
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+set.seed(5312)
+x = rnorm(100)
+eps = rnorm(100, 0, sqrt(0.25))
+```
+
+## 1c
+B0 is -1 and B1 is 0.5. The length of y is 100.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+y = -1 + 0.5 * x + eps
+length(y)
+```
+
+## 1d
+The relationship betweena x and y seems linear with some outliers by eps.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+plot(y ~ x)
+```
+
+## 1e
+Since the p-value of the model is very small (less than 0.05) with a large F-statistic, there is significant evidence to show the relationship between B0 and B1. As the values of both samples B0 and B1 are closed to B0 and B1, the H0 can be rejected.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+fit = lm(y ~ x)
+summary(fit)
+```
+
+## 1f
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+plot(x, y)
+abline(fit, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("bottomright", c("Least square fit", "Popu. Reg"), col = c("red", "blue"), lty = c(1, 1))
+```
+
+## 1g
+Although there is a slight improvement in RSE and R^2, since the p-value of X^2 is 0.281, which is higher than 0.05, so there is not sufficient evidence to show this fit2 can improve the fitness of the model.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+fit2 <- lm(y ~ poly(x,2))
+summary(fit2)
+```
+
+## 1h
+To reduce the noise in the data, I would decrease the variance of eps' normal distribution. Both intercept and x have small p-value which smaller than 0.05, but the value of R^2 and RSE is much higher and lower respectively. So the relationship between them is linear with little noise.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+set.seed(5312)
+eps <- rnorm(100, sd = 0.125)
+x <- rnorm(100)
+y <- -1 + 0.5 * x + eps
+plot(x, y)
+fit3 <- lm(y ~ x)
+summary(fit3)
+
+abline(fit3, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("bottomright", c("Least square fit", "Popu. Reg"), col = c("red", "blue"), lty = c(1, 1))
+```
+
+## 1i
+I increase the eps' variance to add more noise. Although the variables have a small p-value where smaller than 0.05, the RSE and R^2 is much higher and lower respectively. Thus the relationship is not quite linear with a wider space within 2 lines.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+set.seed(5312)
+eps <- rnorm(100, sd = 0.75)
+x <- rnorm(100)
+y <- -1 + 0.5 * x + eps
+plot(x, y)
+fit4 <- lm(y ~ x)
+summary(fit4)
+
+abline(fit4, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("bottomright", c("Least square fit", "Popu. Reg"), col = c("red", "blue"), lty = c(1, 1))
+```
+
+## 1j
+0.5 seems to be centred in all 3 intervals. The number of noise is proportional to the width of the confidence intervals. For example, there is more noise with wider intervals.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+confint(fit)
+confint(fit3)
+confint(fit4)
+```
+
+
+
+
+
+
+# 2
+This report provides a brief analysis of the daily and weekly COVID-19 case numbers of different countries. The data set concludes the observes and variables from daily and weekly dataframe.
+
+## Required library
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(naniar)
+library(ggplot2)
+library(readr)
+library(tidyverse)
+library(hrbrthemes)
+library(reshape2)
+library(plotly)
+library(randomForest)
+library(psych)
+```
+
+## Data structure overview
+The dataframe daily is used in the report. Firstly, the original data contains 56487 rows with 25 columns. It includes features such as `Country`, `Datetime` and policies. However, there are 9583 empty values in total which `H3_Contact tracing` contains the most empty values. Moreover, there are 170 countries in daily. From the summary, we can discover that the time period is from `2020-01-03` to `2021-01-31`. The distribution of `New_cases` and `New_deaths` is skewed right. From the boxplot containing all policies, `H1_Public information campaigns` and `H7_Vaccination policy` have more outliers. Most of the policies have a centre between 1-3.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+load("/Users/guyverchan/Documents/HKU/SOWK3136/covid.RData")
+
+dim(daily)
+names(daily)
+
+# Empty value
+sum(is.na(daily))
+apply(apply(daily,2,is.na),2,sum) ; nrow(daily)
+gg_miss_upset(daily)
+
+# Sum of Contries
+countCountry = daily[!duplicated(daily$Country), ]
+dim(countCountry)
+
+summary(daily)
+describe(daily[4:22])
+boxplot(daily[8:22], las=2)
+
+```
+
+## Data preparation
+It is interesting to observe that some policies are correlated to each other. For example, `C3_Cancel public events` and `C4_Restrictions on gatherings` share `0.65` correlate coefficient, `C6_Stay at home requirements` and `C7_Restrictions on internal movement` share `0.59` correlate coefficient. It is reasonable in reality because gatherings are also one of the public events and people would stay at home more while restricting the internal movement.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+df = daily[complete.cases(daily$New_cases), ]
+df$Day = as.Date(df$Datetime, "&b")
+df$New_cases[df$New_cases<0] = 0
+df$New_deaths[df$New_deaths<0] = 0
+
+end = df[df$Day=="2021-01-31", ]
+
+corDf = select(df,-Day,-Datetime, -Country, -CountryCode)
+corM = cor(model.matrix(~0+., data=corDf), use="pairwise.complete.obs")
+zdf = as.data.frame(as.table(corM))
+zdf = zdf[zdf$Freq != 1, ]
+zdf = arrange(zdf,desc(Freq))
+```
+
+## 2a
+### What is the top 10 most cases and deaths countries?
+
+From the scattered plot of the top 10 most cases and deaths countries, it can be shown that `USA` is the most cumulative cases and deaths country. `Brazil` is the country with the second most cumulative death and followed by `India` and `France`. Therefore, I would select the four countries `USA`, `Brazil`, `France` and `Mexico` for the research.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+end = end %>% arrange(desc(Cumulative_deaths, Cumulative_cases))
+ggplot(end[1:10, ], aes(x=Cumulative_cases, y=Cumulative_deaths, color=Country)) +
+    geom_point(alpha=0.7)
+
+df_selected = df[df$Country == "Brazil" | df$CountryCode == "IND" |
+                   df$CountryCode == "USA" | df$Country == "Mexico", ]
+
+```
+
+## 2b
+From this line graph, the cumulative cases of the USA increased explosively in Q4. Both India and Brazil still rose steadily during the whole year. Only Mexico grow slowly among all four countries.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+cCases = ggplot(df_selected, aes(x=Day, y=Cumulative_cases, col=Country)) +
+  geom_point(size=1) +
+  theme_ipsum() +
+  ggtitle("Cumulative cases in 4 countries")
+
+ggplotly(cCases)
+```
+
+## 2c
+The graph shows that the cumulative deaths had an up-rising number starting from April 2020 inside the USA. It led for a year among four countries. In contrast, the other three countries kept increasing steadily.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+cDeaths = ggplot(df_selected, aes(x=Day, y=Cumulative_deaths, col=Country)) +
+  geom_point(size=1) +
+  theme_ipsum() +
+  ggtitle("Cumulative death in 4 countries")
+
+ggplotly(cDeaths)
+```
+
+## 2d
+Entering November of 2020, the USA faced a new wave of infection which led to the number of new cases increasing and reaching the peak in the Christmas holiday. In contrast, the other three countries had a steady number of cases during the year although India faced a small wave in September 2020.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+cases = ggplot(df_selected, aes(x=Day, y=New_cases, col=Country)) +
+  geom_line(size=.51) +
+  theme_ipsum() +
+  ggtitle("New cases in 4 countries")
+
+ggplotly(cases)
+```
+
+## 2e
+From this line chart, the USA had a sudden boost in deaths number in April 2020. Although the number dropped for the third quarter of 2020, it rebounded starting from October and kept increasing. Although Mexico also had a sudden rise on 10 October 2020, both Mexico and Brazil regularly increased the deaths from December. However, India was the only country that dropped the number.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+dealths = ggplot(df_selected, aes(x=Day, y=New_deaths, col=Country)) +
+  geom_line(size=.5) +
+  theme_ipsum() +
+  ggtitle("New dealths in 4 countries")
+
+ggplotly(dealths)
+```
+
+## 2f
+### What is the change after implementing C3 & C4?
+From the policy implementation of C3 and C4, the pattern of all four countries seems similar which may have a relationship between them. Starting from April 2020, all four countries had implemented restrictions on public events and gatherings. C4 should be an effective policy in India as the new cases increased while the government lowered the level during September. But in other countries, there were still having new cases every day, especially in the USA. The number still grow while banning people from having gatherings.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+df_selected %>% pivot_longer(cols = c(`C3_Cancel public events`, `C4_Restrictions on gatherings`), values_to = "val", names_to = "Policy") %>%
+  ggplot(aes(x = Day, y = val, col = Policy))+
+  geom_point()+
+  theme_ipsum() +
+  facet_wrap( ~ Country, ncol=2) +
+  ggtitle("C3 & C4 Policy implementation") +
+  theme(legend.position = "top",
+        legend.justification='right')
+```
+
+## 2e
+### What is the change after implementing C6 & C7?
+From the policy implementation of C6 and C7, the pattern of all four countries seems similar which may have a relationship between them. Starting from April 2020, all four countries had implemented restrictions on internal movement and stay at home policy. However, the two policies should have a smaller weight affecting the number of new cases as they kept increasing while implementing these rules.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+df_selected %>% pivot_longer(cols = c(`C6_Stay at home requirements`, `C7_Restrictions on internal movement`), values_to = "val", names_to = "Policy") %>%
+  ggplot(aes(x = Day, y = val, col = Policy))+
+  geom_point()+
+  theme_ipsum() +
+  facet_wrap( ~ Country, ncol=2) +
+  ggtitle("C6 & C7 Policy implementation") +
+  theme(legend.position = "top",
+        legend.justification='right')
+```
+
+## 2f
+### Did the countries help affected citizens in economic aspects?
+Among the four countries, the USA provided the most financial assistance to their citizens. The number should also affect by the most number of new cases and deaths. In contrast, India decreased the level of income support while the number of new cases dropped and fewer citizens were affected. However, India still promoted its debt relief plan for the same with Mexico. Thus, all four countries had provided various planning assisting their people.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+plot_ly(x=df_selected$Day, y=df_selected$Country, z=df_selected$`E1_Income support`, type="scatter3d", mode="markers", color=df_selected$Country)
+
+plot_ly(x=df_selected$Day, y=df_selected$Country, z=df_selected$`E2_Debt/contract relief`, type="scatter3d", mode="markers", color=df_selected$Country)
+```
+
+
+

@@ -1,0 +1,128 @@
+---
+title: "Lecture 5"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+#############
+##  t-test
+
+```{r, echo = TRUE}
+daily.intake <- c(5260,5470,5640,6180,6390,6515, 6805,7515,7516,8230,8770)
+mean(daily.intake)
+sd(daily.intake)
+quantile(daily.intake)
+```
+You might wish to investigate whether the women’s energy intake deviates
+systematically from a recommended value of 7725. How to do it?
+
+##  t-test
+
+```{r , echo = TRUE}
+t.test(daily.intake,mu=7725)
+#t.test(daily.intake,mu=7725,alternative = "greater")
+#t.test(daily.intake,mu=7725,alternative = "less")
+```
+
+## Wilcoxon signed-rank test
+The one-sample Wilcoxon signed-rank test is a non-parametric statistical hypothesis test used to test the location of a set of samples $X_1, \dots, X_n$.
+$$ T = \sum_{i=1}^n \mathrm{sgn}(X_i) R_i, $$
+where $R_1, \dots, R_n$ are the ranks such that $0<|X_{R_1}|<|X_{R_2}|<\dotsb<|X_{R_n}|$
+
+```{r,echo=TRUE}
+wilcox.test(daily.intake, mu=7725)
+```
+If this test is unfamiliar to you, please read https://online.stat.psu.edu/stat414/node/319/.
+
+## Two sample t-test 
+```{r,echo=T}
+x1 = rnorm(100,0,1)
+x2 = rnorm(100,1,1)
+x = c(x1,x2)
+group = c(rep(1,100),rep(0,100))
+t.test(x~group)
+#t.test(x~group,var.equal=T)
+```
+
+
+## Comparing variances
+
+```{r,echo=T}
+var.test(x~group)
+```
+
+## The paired t test
+Paired tests are used when there are two measurements on the same experimental
+unit. The theory is essentially based on taking differences and
+thus reducing the problem to that of a one-sample test
+$$ t = \dfrac{\bar{X}_D - \mu_0}{s_D/\sqrt{n}}, $$
+where $\bar{X}_D$ and $s_D$ are the average and standard deviation of the 
+differences between all pairs.
+```{r,echo=T}
+t.test(x1, x2, paired=T)
+```
+It is virtually identical to
+that of a one-sample t test on the elementwise differences.
+
+## The matched-pairs Wilcoxon test
+
+```{r,echo=T}
+wilcox.test(x1, x2, paired=T)
+```
+
+## Simple linear regression
+The simple linear regression model is 
+$$y_i = \beta_0 + \beta_1 x_i +\epsilon_i, \epsilon_i \sim N(0,\sigma^2).$$
+```{r,echo=T,ig.height=3, fig.width=6}
+x = rnorm(50,0,1)
+y = 1 + 2*x + rnorm(50,0,0.1)
+```
+## Simple linear regression
+
+```{r,echo=T,ig.height=3, fig.width=6}
+plot(x,y)
+```
+
+## Fit the regression model 
+```{r,echo=T,ig.height=3, fig.width=6}
+lm(y~x)
+```
+
+## Summary
+```{r,echo=T,ig.height=3, fig.width=6}
+fit = lm(y~x)
+summary(fit)
+```
+
+
+## Residuals
+```{r,echo=T,ig.height=3, fig.width=6}
+plot(fit)
+```
+
+## Residual Check 
+```{r,echo=T,ig.height=3, fig.width=6}
+qqnorm(resid(fit))
+```
+
+## Correlation
+```{r,echo=T,ig.height=3, fig.width=6}
+cor(x1,x2)
+cor.test(x1,x2)
+```
+
+## Spearman
+This is obtained quite simply by replacing
+the observations by their rank and computing the correlation.
+```{r,echo=T,ig.height=3, fig.width=6}
+cor.test(x1,x2,method = "spearman")
+```
+
+
+
+
+
+
+

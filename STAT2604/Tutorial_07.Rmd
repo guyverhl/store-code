@@ -1,0 +1,411 @@
+---
+title: "Tutorial 07: Presentations and Shiny Web App"
+author: "<br>Department of Statistics and Actuarial Science</br> The University of Hong Kong"
+output: ioslides_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, tidy = TRUE)
+```
+
+
+
+# Presentations from R Markdown
+
+
+---
+
+- Create a slide show broken up into sections by using the `#` and `##` heading tags.
+- Create a new slide without a header using a horizontal rule (`---`).
+
+
+
+## Ioslides Presentation
+
+  [Reference](https://bookdown.org/yihui/rmarkdown/ioslides-presentation.html)
+
+  - `f`: Enable fullscreen mode
+  - `w`: Toggle widescreen mode
+  - `o`: Enable overview mode
+  - `h`: Enable code highlight mode
+  - `p`: Show presenter notes  
+  \
+  
+  Nice default appearance. Suitable for making presentations.
+
+
+
+## Slidy Presentation
+
+  [Reference](https://bookdown.org/yihui/rmarkdown/slidy-presentation.html)
+
+  - `c`: Show table of contents
+  - `f`: Toggles the display of the footer
+  - `a`: Toggles display of current vs all slides (useful for printing handouts)
+  - `s`: Make fonts smaller
+  - `b`: Make fonts larger  
+  \ 
+  
+  Suitable for making presentations to be shared or printed.
+
+
+
+
+# Shiny Web App
+
+## Empty Shiny App
+
+```{r}
+library(shiny)
+
+# Define UI ----
+ui <- fluidPage(
+  
+)
+
+# Define server logic ----
+server <- function(input, output) {
+  
+}
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+```
+
+
+
+## Layout
+
+- `fluidPage` creates a display that automatically adjusts to the dimensions of user's browser window  
+\ 
+
+```{r}
+ui <- fluidPage(
+  titlePanel("Hello Shiny!")
+)
+
+shinyApp(ui = ui, server = function(input, output){})
+```
+
+
+
+
+
+---
+
+### **Sidebar Layout**
+
+- `sidebarLayout` 
+  - `sidebarPanel`
+  - `mainPanel`  
+\ 
+
+```{r}
+ui <- fluidPage(
+
+  titlePanel("Hello Shiny!"),
+
+  sidebarLayout(
+    
+    position = "left", # by default
+
+    sidebarPanel("sidebar panel"),
+
+    mainPanel("main panel")
+  )
+)
+
+shinyApp(ui = ui, server = function(input, output){})
+```
+
+
+
+
+---
+
+### **Grid Layout**
+
+- `fluidRow`
+  - `column`
+    - `wellPanel`  
+\ 
+
+
+```{r}
+ui <- fluidPage(
+
+  titlePanel("Hello Shiny!"),
+
+  fluidRow(
+  
+    column(4,
+      wellPanel(
+        "well panel"
+      )       
+    ),
+
+    column(8,
+      "normal column"
+    )
+  ),
+  
+  fluidRow(
+  
+    column(12,
+      wellPanel(
+        "well panel in row 2"
+      )       
+    )
+  )
+)
+
+shinyApp(ui = ui, server = function(input, output){})
+```
+
+
+
+---
+
+### Other Layouts
+
+[Official Layout Guide](https://shiny.rstudio.com/articles/layout-guide.html)
+
+
+
+## Control Widgets
+
+- `actionButton`	Action Button
+- `checkboxGroupInput`	A group of check boxes
+- `checkboxInput`	A single check box
+- `dateInput`	A calendar to aid date selection
+- `dateRangeInput`	A pair of calendars for selecting a date range
+- `fileInput`	A file upload control wizard
+- `helpText`	Help text that can be added to an input form
+- `numericInput`	A field to enter numbers
+- `radioButtons`	A set of radio buttons
+- `selectInput`	A box with choices to select from
+- `sliderInput`	A slider bar
+- `submitButton`	A submit button
+- `textInput`	A field to enter text
+
+
+---
+
+### First two arguments for each widget function
+
+- a name for the widget
+- a label appear with the widget in your app
+
+---
+
+```{r}
+library(shiny)
+
+# Define UI ----
+ui <- fluidPage(
+  titlePanel("Basic widgets"),
+  
+  fluidRow(
+    
+    column(3,
+           h3("Buttons"),
+           actionButton("action", "Action"),
+           br(),
+           br(), 
+           submitButton("Submit")),
+    
+    column(3,
+           h3("Single checkbox"),
+           checkboxInput("checkbox", "Choice A", value = TRUE)),
+    
+    column(3, 
+           checkboxGroupInput("checkGroup", 
+                              h3("Checkbox group"), 
+                              choices = list("Choice 1" = 1, 
+                                             "Choice 2" = 2, 
+                                             "Choice 3" = 3),
+                              selected = 1)),
+    
+    column(3, 
+           dateInput("date", 
+                     h3("Date input"), 
+                     value = "2014-01-01"))   
+  ),
+  
+  fluidRow(
+    
+    column(3,
+           dateRangeInput("dates", h3("Date range"))),
+    
+    column(3,
+           fileInput("file", h3("File input"))),
+    
+    column(3, 
+           h3("Help text"),
+           helpText("Note: help text isn't a true widget,", 
+                    "but it provides an easy way to add text to",
+                    "accompany other widgets.")),
+    
+    column(3, 
+           numericInput("num", 
+                        h3("Numeric input"), 
+                        value = 1))   
+  ),
+  
+  fluidRow(
+    
+    column(3,
+           radioButtons("radio", h3("Radio buttons"),
+                        choices = list("Choice 1" = 1, "Choice 2" = 2,
+                                       "Choice 3" = 3),selected = 1)),
+    
+    column(3,
+           selectInput("select", h3("Select box"), 
+                       choices = list("Choice 1" = 1, "Choice 2" = 2,
+                                      "Choice 3" = 3), selected = 1)),
+    
+    column(3, 
+           sliderInput("slider1", h3("Sliders"),
+                       min = 0, max = 100, value = 50),
+           sliderInput("slider2", "",
+                       min = 0, max = 100, value = c(25, 75))
+    ),
+    
+    column(3, 
+           textInput("text", h3("Text input"), 
+                     value = "Enter text..."))   
+  )
+  
+)
+
+# Define server logic ----
+server <- function(input, output) {
+  
+}
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+```
+
+
+
+
+## Reactive Output
+
+### **Output functions**
+
+Turn R objects into output for your user interface
+
+- `dataTableOutput`	DataTable
+- `htmlOutput	raw` HTML
+- `imageOutput`	image
+- `plotOutput`	plot
+- `tableOutput`	table
+- `textOutput`	text
+- `uiOutput`	raw HTML
+- `verbatimTextOutput`	text
+
+
+---
+
+```{r}
+fluidPage(
+
+  # App title ----
+  titlePanel("Hello Shiny!"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+
+      # Input: Slider for the number of bins ----
+      sliderInput(inputId = "bins",
+                  label = "Number of bins:",
+                  min = 1,
+                  max = 50,
+                  value = 30)
+
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+
+      # Output: Histogram ----
+      plotOutput(outputId = "distPlot")
+
+    )
+  )
+)
+```
+
+---
+
+### **Render functions**
+
+Each entry to `xxxOutput` functions should contain the output of one of Shiny’s `renderXxx` functions.
+
+- `renderDataTable`	dataTable
+- `renderImage`	images (saved as a link to a source file)
+- `renderPlot`	plots
+- `renderPrint`	any printed output
+- `renderTable`	data frame, matrix, other table like structures
+- `renderText`	character strings
+- `renderUI`	a Shiny tag object or HTML
+
+---
+
+```{r}
+ui <- fluidPage(
+
+  # App title ----
+  titlePanel("Hello Shiny!"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+
+      # Input: Slider for the number of bins ----
+      sliderInput(inputId = "bins",
+                  label = "Number of bins:",
+                  min = 1,
+                  max = 50,
+                  value = 30)
+
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+
+      # Output: Histogram ----
+      plotOutput(outputId = "distPlot")
+
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+
+    x    <- faithful$waiting
+    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+    hist(x, breaks = bins, col = "#75AADB", border = "white",
+         xlab = "Waiting time to next eruption (in mins)",
+         main = "Histogram of waiting times")
+
+    })
+
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+
+## Exercise 
+
+Change the slider widget in the last Shiny app (for histogram of waiting times) to a select boxe.
